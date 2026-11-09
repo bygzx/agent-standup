@@ -46,3 +46,7 @@ reports/**
 CLAUDE.md
 *.xlsx
 *.csv
+FORK-SYNC.md
+
+# the editor's own project files (.idea is in .gitignore too): never in a package
+.idea/**

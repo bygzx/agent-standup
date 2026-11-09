@@ -29,3 +29,7 @@ brand/youtube/**/*.mp4
 # private exports left at the root by hand (the Marketplace publisher report): never in the public repository
 *.xlsx
 *.csv
+.idea
+
+# the fork-sync memo written at the root by hand: local only, never part of the repository or of a package
+FORK-SYNC.md
