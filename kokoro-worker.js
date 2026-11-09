@@ -51,6 +51,7 @@ async function main() {
   const dir = process.env.AGENT_STANDUP_KOKORO_DIR, dtype = process.env.AGENT_STANDUP_KOKORO_DTYPE || 'q4';
   const req = createRequire(path.join(dir, 'node_modules', 'x.js'));   // resolve from the install folder, not from the extension
   const tf = req('@huggingface/transformers'); tf.env.cacheDir = path.join(dir, 'models');
+  if (process.env.HF_ENDPOINT) tf.env.remoteHost = String(process.env.HF_ENDPOINT).replace(/\/?$/, '/');   // a mirror: Hugging Face is not reachable everywhere
   const { KokoroTTS } = req('kokoro-js'), load = () => KokoroTTS.from_pretrained(MODEL, { dtype, device: 'cpu' });
   let tts; try { tts = await load(); } catch (e) {
     // transformers.js writes the model straight to its final name and never checks it again: a download cut short (the worker killed while the model
@@ -84,4 +85,8 @@ async function main() {
     catch (e) { send({ id: m.id, ok: false, error: String((e && e.message) || e).slice(0, 200) }); }
   }
 }
-main().catch((e) => { console.error(String((e && e.stack) || e)); process.exit(1); });
+main().catch((e) => {   // one line, short: the page shows the last one the worker wrote
+  const m = String((e && e.message) || e);
+  console.error(m === 'fetch failed' ? 'kokoro: the model could not be downloaded (no network, or a proxy Node does not use): set HTTPS_PROXY or HF_ENDPOINT' : String((e && e.stack) || e));
+  process.exit(1);
+});

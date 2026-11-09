@@ -44,7 +44,7 @@ function install() {
   if (job || g2p()) return status();
   const npm = findNpm(); if (!npm) { lastError = 'npm not found'; return status(); }
   fs.mkdirSync(DIR, { recursive: true }); lastError = '';
-  const out = fs.openSync(LOG, 'w'), args = ['install', '--prefix', DIR, '--no-audit', '--no-fund', PKG, G2P];
+  const out = fs.openSync(LOG, 'w'), args = ['install', '--prefix', DIR, '--no-audit', '--no-fund', '--include=optional', PKG, G2P];   // sharp (through transformers.js) needs its platform binary, an optional package: an npm configured to omit them left a worker that cannot load
   const env = { ...process.env }, pk = Object.keys(env).find((k) => k.toUpperCase() === 'PATH') || 'PATH'; env[pk] = path.dirname(npm) + path.delimiter + (env[pk] || '');   // npm starts with `#!/usr/bin/env node`: an editor or app opened from the Dock has a PATH without node's folder (exit 127, issue #11), and node sits next to npm
   job = WIN && /\.(cmd|bat)$/i.test(npm) ? spawn('"' + npm + '"', args.map((a) => (a === DIR ? '"' + a + '"' : a)), { shell: true, env, stdio: ['ignore', out, out], windowsHide: true }) : spawn(npm, args, { env, stdio: ['ignore', out, out], windowsHide: true });
   const done = (why) => { job = null; try { fs.closeSync(out); } catch {} if (why) lastError = why; else warm(); };
@@ -58,7 +58,10 @@ let worker = null, restarts = 0, seq = 0; const queue = []; let busy = false;
 function startWorker() {
   if (worker) return worker;
   if (restarts >= MAX_RESTARTS) throw new Error('kokoro worker gave up');
-  const p = spawn(process.execPath, [WORKER], { env: { ...process.env, ELECTRON_RUN_AS_NODE: '1', AGENT_STANDUP_KOKORO_DIR: DIR, AGENT_STANDUP_KOKORO_DTYPE: DTYPE }, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
+  const env = { ...process.env, ELECTRON_RUN_AS_NODE: '1', AGENT_STANDUP_KOKORO_DIR: DIR, AGENT_STANDUP_KOKORO_DTYPE: DTYPE };
+  for (const [k, v] of [['HTTPS_PROXY', env.https_proxy], ['HTTP_PROXY', env.http_proxy], ['NO_PROXY', env.no_proxy]]) if (v && !env[k]) env[k] = v;   // a shell sets them in lower case; Node's fetch reads the upper-case ones
+  const useProxy = (env.HTTPS_PROXY || env.HTTP_PROXY) && process.allowedNodeEnvironmentFlags && process.allowedNodeEnvironmentFlags.has('--use-env-proxy');   // Node's fetch ignores a proxy unless told, unlike curl: without it the model download fails behind one
+  const p = spawn(process.execPath, [...(useProxy ? ['--use-env-proxy'] : []), WORKER], { env, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
   const w = (worker = { p, ready: false, pending: new Map(), err: '' }); let buf = '';
   p.stdout.on('data', (d) => {
     buf += d; let i;
