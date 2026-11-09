@@ -18,7 +18,7 @@ const projectsDir = () => process.env.AGENT_STANDUP_PROJECTS || path.join(proces
 const cwds = new Map();   // session → the folder it was started in, kept once it is sure (a folder whose name is the project's): per session, since app/old and app-old share one project name
 function cwdOf(r) {
   try {
-    if (r.source === 'codex' || r.source === 'vibe') return String(require(r.source === 'codex' ? './codex.js' : './vibe.js').cwd(r.id) || '');   // a Codex or Vibe session says which folder it was started in
+    if (r.source === 'codex' || r.source === 'vibe' || r.source === 'omp') return String(require('./' + r.source + '.js').cwd(r.id) || '');   // a Codex, Vibe or omp session says which folder it was started in
     const ck = r.proj + '/' + r.id; if (cwds.has(ck) || !/^[\w.\-]+$/.test(String(r.proj)) || !/^[\w.\-]+$/.test(String(r.id))) return cwds.get(ck) || '';
     const fd = fs.openSync(path.join(projectsDir(), r.proj, r.id + '.jsonl'), 'r'); let head = ''; try { const buf = Buffer.alloc(64 * 1024), n = fs.readSync(fd, buf, 0, buf.length, 0); head = buf.subarray(0, n).toString('utf8'); } finally { fs.closeSync(fd); }
     const m = /"cwd":"((?:[^"\\]|\\.)*)"/.exec(head), cwd = m ? JSON.parse('"' + m[1] + '"') : '';
@@ -290,16 +290,16 @@ function noteUse(st = extCtx && extCtx.globalState, day = new Date().toISOString
     }, () => {});
   } catch (err) { logErr('rating', err); }
 }
-let codex0, vibe0;   // what the environment asked for, put back when the setting is on
-const serverEnv = () => ({ AGENT_STANDUP_CLAUDE: cfg().get('claudePath') || '', AGENT_STANDUP_CHARACTERS: cfg().get('charactersPath') || '', AGENT_STANDUP_CODEX: cfg().get('codex') === false ? 'off' : codex0, AGENT_STANDUP_VIBE: cfg().get('vibe') === false ? 'off' : vibe0, AGENT_STANDUP_LEAD_NAME: String(cfg().get('leadName') || '').trim() || undefined });   // undefined: not set
+let codex0, vibe0, omp0;   // what the environment asked for, put back when the setting is on
+const serverEnv = () => ({ AGENT_STANDUP_CLAUDE: cfg().get('claudePath') || '', AGENT_STANDUP_CHARACTERS: cfg().get('charactersPath') || '', AGENT_STANDUP_CODEX: cfg().get('codex') === false ? 'off' : codex0, AGENT_STANDUP_VIBE: cfg().get('vibe') === false ? 'off' : vibe0, AGENT_STANDUP_OMP: cfg().get('omp') === false ? 'off' : omp0, AGENT_STANDUP_LEAD_NAME: String(cfg().get('leadName') || '').trim() || undefined });   // undefined: not set
 function activate(ctx) {
   extCtx = ctx; pingActive(ctx);
   try { process.env.AGENT_STANDUP_HOST = `${vscode.env.appName || 'editor'} ${vscode.version || ''}`.trim(); } catch {}   // named in a problem report: VS Code, Cursor, VSCodium…
   try { process.env.AGENT_STANDUP_RATE = ratePage(); } catch {}   // ⚙ › Rate, in the page opened in a browser: the store this editor installs from
-  codex0 = process.env.AGENT_STANDUP_CODEX; vibe0 = process.env.AGENT_STANDUP_VIBE;
+  codex0 = process.env.AGENT_STANDUP_CODEX; vibe0 = process.env.AGENT_STANDUP_VIBE; omp0 = process.env.AGENT_STANDUP_OMP;
   noteWindow();
   const applyPath = () => { const e = serverEnv(); for (const [k, v] of Object.entries(e)) { if (v == null) delete process.env[k]; else process.env[k] = v; } if (started) started.then((s) => { if (s.kid && s.kid.connected) s.kid.send({ env: Object.fromEntries(Object.entries(e).map(([k, v]) => [k, v === undefined ? null : v])) }); }).catch(() => {}); };   /* null: unset there too (JSON leaves out undefined) */   // here (the characters folder, a server in the extension host) and in the server's process
-  applyPath(); ctx.subscriptions.push(vscode.workspace.onDidChangeConfiguration((ev) => { if (ev.affectsConfiguration('agentStandup.claudePath') || ev.affectsConfiguration('agentStandup.charactersPath') || ev.affectsConfiguration('agentStandup.codex') || ev.affectsConfiguration('agentStandup.vibe') || ev.affectsConfiguration('agentStandup.leadName')) applyPath(); if (ev.affectsConfiguration('agentStandup.leadName')) for (const w of [panel, side]) if (w) try { w.webview.postMessage({ agentStandup: 'lead', name: String(cfg().get('leadName') || '') }); } catch {} }));   // the lead's new name, to the calls open now (a page loaded later has it from the server)
+  applyPath(); ctx.subscriptions.push(vscode.workspace.onDidChangeConfiguration((ev) => { if (ev.affectsConfiguration('agentStandup.claudePath') || ev.affectsConfiguration('agentStandup.charactersPath') || ev.affectsConfiguration('agentStandup.codex') || ev.affectsConfiguration('agentStandup.vibe') || ev.affectsConfiguration('agentStandup.omp') || ev.affectsConfiguration('agentStandup.leadName')) applyPath(); if (ev.affectsConfiguration('agentStandup.leadName')) for (const w of [panel, side]) if (w) try { w.webview.postMessage({ agentStandup: 'lead', name: String(cfg().get('leadName') || '') }); } catch {} }));   // the lead's new name, to the calls open now (a page loaded later has it from the server)
   ctx.subscriptions.push(
     vscode.commands.registerCommand('agentStandup.open', openPanel),
     vscode.commands.registerCommand('agentStandup.openInBrowser', openBrowser),

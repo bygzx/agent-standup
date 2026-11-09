@@ -100,6 +100,11 @@
           "default": true,
           "description": "%config.vibe.description%"
         },
+        "agentStandup.omp": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.omp.description%"
+        },
         "agentStandup.claudePath": {
           "type": "string",
           "default": "",
@@ -151,6 +156,8 @@
     "codex cli",
     "mistral",
     "mistral vibe",
+    "omp",
+    "oh my pi",
     "cowork",
     "agents",
     "ai agents",

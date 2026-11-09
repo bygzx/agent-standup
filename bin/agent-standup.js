@@ -9,12 +9,12 @@ const pkg = require('../package.json');
 const argv = process.argv.slice(2), flags = {}, rest = [];
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i], val = () => argv[++i];
-  if (a === '--port') flags.port = val(); else if (a === '--projects') flags.projects = val(); else if (a === '--codex') flags.codex = val(); else if (a === '--vibe') flags.vibe = val(); else if (a === '--cowork') flags.cowork = val(); else if (a === '--characters') flags.characters = val(); else if (a === '--config-dir') flags.config = val();
+  if (a === '--port') flags.port = val(); else if (a === '--projects') flags.projects = val(); else if (a === '--codex') flags.codex = val(); else if (a === '--vibe') flags.vibe = val(); else if (a === '--omp') flags.omp = val(); else if (a === '--cowork') flags.cowork = val(); else if (a === '--characters') flags.characters = val(); else if (a === '--config-dir') flags.config = val();
   else if (a === '--from') flags.from = val(); else if (a === '--open') flags.open = true; else if (a === '--here') flags.here = true; else if (a === '--json') flags.json = true; else if (a === '--titles') flags.titles = true; else if (a === '--config') flags.config = val();
   else if (a === '-h' || a === '--help') flags.help = true; else if (a === '-v' || a === '--version') flags.version = true; else rest.push(a);
 }
 const cmd = rest[0] || 'serve';
-const HELP = `Agent Standup ${pkg.version} — your Claude Code, Codex and Mistral Vibe agents as a live video call
+const HELP = `Agent Standup ${pkg.version} — your Claude Code, Codex, Mistral Vibe and omp agents as a live video call
 
 Usage
   agent-standup [serve] [--port 4747] [--open]   start the local server (http://localhost:4747)
@@ -29,6 +29,7 @@ Options
   --config DIR      Claude Code's config folder, as CLAUDE_CONFIG_DIR (its projects and sessions folders are read)
   --codex DIR       where Codex keeps its files (default ~/.codex, or $CODEX_HOME); "off" to leave Codex sessions out
   --vibe DIR        where Mistral Vibe keeps its files (default ~/.vibe, or $VIBE_HOME); "off" to leave Vibe sessions out
+  --omp DIR         where omp keeps its files (default ~/.omp/agent, or $PI_CODING_AGENT_DIR); "off" to leave omp sessions out
   --cowork DIR      where the Claude desktop app keeps its Cowork sessions (default: its local-agent-mode-sessions folder); "off" to leave them out
   --characters DIR  folder with your own pixel-art characters (default ~/.agent-standup/characters)
   --from plugin     how the Claude Code plugin starts it (its usage, if you agree to share it, is counted apart); also AGENT_STANDUP_FROM=plugin,
@@ -43,6 +44,7 @@ if (flags.projects) process.env.AGENT_STANDUP_PROJECTS = path.resolve(flags.proj
 if (flags.projects && path.basename(path.resolve(flags.projects)) === 'projects' && !process.env.AGENT_STANDUP_CC_SESSIONS) process.env.AGENT_STANDUP_CC_SESSIONS = path.join(path.dirname(path.resolve(flags.projects)), 'sessions');   // another Claude Code folder: its sessions' status (what needs you) is beside its projects
 if (flags.codex !== undefined) process.env.AGENT_STANDUP_CODEX = /^(0|off|no|false)?$/i.test(String(flags.codex)) ? 'off' : path.resolve(String(flags.codex));
 if (flags.vibe !== undefined) process.env.AGENT_STANDUP_VIBE = /^(0|off|no|false)?$/i.test(String(flags.vibe)) ? 'off' : path.resolve(String(flags.vibe));
+if (flags.omp !== undefined) process.env.AGENT_STANDUP_OMP = /^(0|off|no|false)?$/i.test(String(flags.omp)) ? 'off' : path.resolve(String(flags.omp));
 if (flags.cowork !== undefined) process.env.AGENT_STANDUP_COWORK = /^(0|off|no|false)?$/i.test(String(flags.cowork)) ? 'off' : path.resolve(String(flags.cowork));
 if (flags.config) process.env.CLAUDE_CONFIG_DIR = path.resolve(flags.config);
 if (flags.characters) process.env.AGENT_STANDUP_CHARACTERS = path.resolve(flags.characters);

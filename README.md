@@ -2,7 +2,7 @@
 
 # Agent Standup
 
-**See which of your agents is working, stuck, waiting on another one, or burning tokens — across all your Claude Code, Codex, Mistral Vibe and Cowork sessions, at zero token cost.** Agent Standup turns the session files Claude Code, Codex and Mistral Vibe already write into a live team call (and a board of every session): it only reads local files and never calls Claude unless the call is held in French, Spanish or Brazilian Portuguese, or you turn on the jokes.
+**See which of your agents is working, stuck, waiting on another one, or burning tokens — across all your Claude Code, Codex, Mistral Vibe, omp and Cowork sessions, at zero token cost.** Agent Standup turns the session files Claude Code, Codex, Mistral Vibe and omp already write into a live team call (and a board of every session): it only reads local files and never calls Claude unless the call is held in French, Spanish or Brazilian Portuguese, or you turn on the jokes.
 
 <p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=DoubleGeste.agent-standup"><img src="https://atoll92.github.io/agent-standup/media/install-vscode.png" width="380" alt="Install in VS Code: free and open source"></a>
@@ -17,9 +17,9 @@
 npx @double_geste/agent-standup@latest --open
 ```
 
-**Your Claude Code, Codex or Mistral Vibe session as a live team call.** The lead gives orders, sub-agents join the call, work at their desks, share their screen and report back — with voices, expressions and a view of the real work as it happens.
+**Your Claude Code, Codex, Mistral Vibe or omp session as a live team call.** The lead gives orders, sub-agents join the call, work at their desks, share their screen and report back — with voices, expressions and a view of the real work as it happens.
 
-**Works with:** Claude Code · Codex · Mistral Vibe · Cowork — in VS Code, Cursor, Windsurf, any terminal, or as a desktop app.
+**Works with:** Claude Code · Codex · Mistral Vibe · omp · Cowork — in VS Code, Cursor, Windsurf, any terminal, or as a desktop app.
 
 **Just installed the extension?** Click the Agent Standup icon in the Activity Bar (or run **Agent Standup: Open live call**): the call starts at once, silent, and your first click in it turns the sound on. No session yet: press **▶ Watch the demo**.
 
@@ -101,6 +101,14 @@ Sessions of [Mistral Vibe](https://github.com/mistralai/mistral-vibe) (Mistral's
 - **Turn it off or point it elsewhere:** in VS Code, the setting `agentStandup.vibe`; anywhere else `AGENT_STANDUP_VIBE=off`, or `AGENT_STANDUP_VIBE=/path/to/vibe-home` (command line: `--vibe off` or `--vibe DIR`). With `--projects DIR`, Vibe sessions are only read if you also pass `--vibe`.
 
 Checked against real sessions of Vibe 2.26.1, in both formats. [Watch the 45-second video](https://atoll92.github.io/agent-standup/media/promo-vibe.mp4) ([en français](https://atoll92.github.io/agent-standup/media/promo-vibe-fr.mp4)).
+
+## omp sessions too
+
+Sessions of [omp](https://github.com/can1357/oh-my-pi) (Oh My Pi, the `omp` command) appear next to your Claude Code sessions: in the session list (project “omp”), on the board, and in the live call when one of them is the session you last typed in. Nothing to set up: the app reads the files omp already writes in `~/.omp/agent/sessions` (or `$PI_CODING_AGENT_DIR` when it was pointed elsewhere, `$XDG_DATA_HOME/omp` after `omp config init-xdg`, and the folder of each `omp --profile` beside them), and never writes there.
+
+- **What is shown:** what you typed, what the agent says, its reasoning as inner thoughts, each tool call with its real output and whether it failed, the files it read, searched, wrote and edited, its todo list, web searches, the questions it asks you, the pictures it took or you pasted, the model and token counts, and **its sub-agents**: the agents a `task` call starts join the call under the name omp gave them, with their orders and their reports.
+- **On the board** a session at work, a finished turn and an idle one are read from the end of its file, as omp's own session list does; a session is followed in the folder it was started in, like a Codex or Vibe one.
+- **Turn it off or point it elsewhere:** in VS Code, the setting `agentStandup.omp`; anywhere else `AGENT_STANDUP_OMP=off`, or `AGENT_STANDUP_OMP=/path/to/agent-folder` (the folder that holds `sessions/`; command line: `--omp off` or `--omp DIR`). With `--projects DIR`, omp sessions are only read if you also pass `--omp`.
 
 ## Cowork sessions too
 

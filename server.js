@@ -8,7 +8,8 @@ const os = require('os');
 const crypto = require('crypto');
 const codex = require('./codex.js');     // Codex sessions, read as the same call (see codex.js)
 const vibe = require('./vibe.js');       // Mistral Vibe sessions, the same way (see vibe.js)
-const SOURCES = [codex, vibe], sourceOf = (proj) => SOURCES.find((m) => m.PROJ === proj) || null, guard = (fn, or) => { try { return fn(); } catch (e) { logError('reader', e); return or; } };   // guard: a session of another tool that cannot be read costs that session, never the list   // the tools other than Claude Code: each lists its sessions under one made-up project
+const omp = require('./omp.js');         // omp (Oh My Pi) sessions, the same way (see omp.js)
+const SOURCES = [codex, vibe, omp], sourceOf = (proj) => SOURCES.find((m) => m.PROJ === proj) || null, guard = (fn, or) => { try { return fn(); } catch (e) { logError('reader', e); return or; } };   // guard: a session of another tool that cannot be read costs that session, never the list   // the tools other than Claude Code: each lists its sessions under one made-up project
 const kokoro = require('./kokoro.js');   // natural voices, installed on demand (see kokoro.js)
 const zlib = require('zlib');
 const { execFileSync, execFile } = require('child_process');
@@ -1030,8 +1031,8 @@ function parseRecord(st, r) {
     }
   }
 }
-const codexRecord = codex.parser({ toolLabel, clip, clipOut, testsOf, diffOf, resultMax: RESULT_MAX }), vibeRecord = vibe.parser({ toolLabel, clip: clipOut, resultMax: RESULT_MAX });   // Vibe clips only thoughts and outputs: without the codes of a terminal
-const recordOf = (sx) => (sx === codex ? codexRecord : sx === vibe ? vibeRecord : parseRecord);
+const codexRecord = codex.parser({ toolLabel, clip, clipOut, testsOf, diffOf, resultMax: RESULT_MAX }), vibeRecord = vibe.parser({ toolLabel, clip: clipOut, resultMax: RESULT_MAX }), ompRecord = omp.parser({ toolLabel, clip, clipOut, resultMax: RESULT_MAX });   // Vibe clips only thoughts and outputs: without the codes of a terminal
+const recordOf = (sx) => (sx === codex ? codexRecord : sx === vibe ? vibeRecord : sx === omp ? ompRecord : parseRecord);
 // A sub-agent the person named keeps that name on screen: the name given when it was launched, or else its type when that type is the person's own (.claude/agents/code-reviewer.md → "Code Reviewer").
 // The types Claude Code ships are not names: those agents get a first name from the page, as before.
 const STOCK_AGENT = /^(general-purpose|explore|plan|claude|agent|task|fork|main|default|worker|subagent|workflow-subagent|statusline-setup|output-style-setup|claude-code-guide|verification|magic-docs)$/i;

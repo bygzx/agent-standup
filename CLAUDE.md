@@ -1,6 +1,6 @@
 # Agent Standup: notes for coding agents
 
-Agent Standup shows the Claude Code, Codex, Mistral Vibe and Cowork sessions of a computer as a live video call: drawn characters, voices, a board, a sessions list. Its local Node server only reads the session files those tools already write. It has no runtime dependencies, and it calls Claude only to translate the call and, when turned on, for the jokes: the user's own `claude`, or the Anthropic API when `ANTHROPIC_API_KEY` is set. It ships as a VS Code extension (Marketplace and Open VSX), an npm CLI (`@double_geste/agent-standup`), a Claude Code plugin, and a macOS app. The repository is public (MIT).
+Agent Standup shows the Claude Code, Codex, Mistral Vibe, omp and Cowork sessions of a computer as a live video call: drawn characters, voices, a board, a sessions list. Its local Node server only reads the session files those tools already write. It has no runtime dependencies, and it calls Claude only to translate the call and, when turned on, for the jokes: the user's own `claude`, or the Anthropic API when `ANTHROPIC_API_KEY` is set. It ships as a VS Code extension (Marketplace and Open VSX), an npm CLI (`@double_geste/agent-standup`), a Claude Code plugin, and a macOS app. The repository is public (MIT).
 
 ## Map
 | Path | What |
@@ -23,7 +23,7 @@ Agent Standup shows the Claude Code, Codex, Mistral Vibe and Cowork sessions of 
 
 ## Run and test
 - `node server.js` → http://localhost:4747 (`PORT=…`). `?live=0` opens the replay picker, `?proj=<dir>` limits the call to one project.
-- To run against chosen data, set `AGENT_STANDUP_PROJECTS` (sessions folder), `AGENT_STANDUP_PREFS` (settings file), `AGENT_STANDUP_CC_SESSIONS` (Claude Code's per-session status folder, `~/.claude/sessions`), `AGENT_STANDUP_CHARACTERS`, `AGENT_STANDUP_PACKS`, `AGENT_STANDUP_KOKORO_DIR`, `AGENT_STANDUP_COWORK=off`, `AGENT_STANDUP_CODEX=0`, `AGENT_STANDUP_VIBE=0`, `AGENT_STANDUP_CLAUDE` (a stand-in `claude` for translation) and `AGENT_STANDUP_STORE` (the shop; `scripts/shop-dev.js` is a pretend one). Never point a test server at the user's real prefs.
+- To run against chosen data, set `AGENT_STANDUP_PROJECTS` (sessions folder), `AGENT_STANDUP_PREFS` (settings file), `AGENT_STANDUP_CC_SESSIONS` (Claude Code's per-session status folder, `~/.claude/sessions`), `AGENT_STANDUP_CHARACTERS`, `AGENT_STANDUP_PACKS`, `AGENT_STANDUP_KOKORO_DIR`, `AGENT_STANDUP_COWORK=off`, `AGENT_STANDUP_CODEX=0`, `AGENT_STANDUP_VIBE=0`, `AGENT_STANDUP_OMP=0`, `AGENT_STANDUP_CLAUDE` (a stand-in `claude` for translation) and `AGENT_STANDUP_STORE` (the shop; `scripts/shop-dev.js` is a pretend one). Never point a test server at the user's real prefs.
 - The live tests get their own empty packs and characters folders and treat the Halloween line as done; a change that depends on the date or on installed packs can pass here and fail in CI.
 - `npm test` takes about 2.5 minutes: the four browser files run side by side. While iterating, run one file: `node --test test/server.test.js`.
 - `npm run i18n` checks that every language has every key, and rebuilds the website and landing locale files.

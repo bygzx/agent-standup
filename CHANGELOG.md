@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- **omp sessions too.** Sessions of omp (Oh My Pi, the `omp` command) appear next to your Claude Code sessions: in the session list (project “omp”), on the board, and in the live call. The app reads the files omp already writes in `~/.omp/agent/sessions` (and the folder of each `omp --profile`) and never writes there; what you typed, what the agent says, its tools and their output, its todo list, its pictures and its sub-agents (with their orders and reports) are shown like a Claude Code session. VS Code: the setting `agentStandup.omp`; anywhere else `AGENT_STANDUP_OMP=off`, or `--omp off`.
+
 ## 1.42.0
 - **Codex sub-agents join their lead's call.** When a Codex session starts sub-agents (and they start their own), each one joins the call of the session that started it, under the name Codex gave it, with its own commands and their output, its tokens and the report it hands back; the lead stays at work while one of them works. A sub-agent is no longer listed as a session of its own, and the short reviews Codex runs before a command stay hidden. Compressed Codex threads work the same way. Contributed by [Harrison O'Connor-Hoover](https://github.com/harrisonoconnorhover) (#13).
 - **Give the lead another name than Margot.** ⚙ → All settings → Characters → **Lead agent name**, or in VS Code the setting `agentStandup.leadName`, which gives each workspace its own name and wins over the field. The lead is renamed at once on its tile, in the agents list and in the transcript; its forks follow (“Bob 2”, “Bob 3”…), a sub-agent never keeps the same name, and an empty field brings Margot back. Asked for, and tested on real sessions, by [Saros-12-42](https://github.com/Saros-12-42) (#14).
