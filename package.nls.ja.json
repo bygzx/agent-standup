@@ -13,6 +13,7 @@
   "config.codex.description": "Codex のセッションも表示します（~/.codex/sessions または $CODEX_HOME から読み込み）。オフにすると Claude Code のセッションのみを表示します。",
   "config.vibe.description": "Mistral Vibe のセッションも表示します（~/.vibe/logs/session または $VIBE_HOME から読み込み）。オフにすると表示しません。",
   "config.omp.description": "omp のセッションも表示します（~/.omp/agent/sessions または $PI_CODING_AGENT_DIR から読み込み）。オフにすると表示しません。",
+  "config.reply.description": "通話から、フォロー中の Claude Code セッションの tmux ペインにメッセージを入力できるようにします（Linux のみ、既定ではオフ）。あなたとしてコマンドを実行できる人は誰でも、あなたのセッションに入力できるようになります。",
   "config.claudePath.description": "Claude Code 実行ファイルのフルパス（自動で見つからない場合）。翻訳に使用します。",
   "config.charactersPath.description": "自作キャラクター画像（PNG、GIF、WebP、各300 KBまで）のフォルダ。空の場合は ~/.agent-standup/characters を使います。lead.png がメインエージェント、you.png があなた、それ以外の画像はサブエージェントになります。name-talk.png は口を開けた状態のフレーム（任意）です。",
   "config.leadName.description": "通話でのメインエージェントの名前（フォークはこの名前を引き継ぎます：名前 2、名前 3…）。空欄の場合は通話の設定で選んだ名前、なければ Margot。最大 24 文字。",

@@ -2,7 +2,7 @@
   "name": "agent-standup",
   "displayName": "Agent Standup: Claude Code & Codex Agent Monitor",
   "description": "%extension.description%",
-  "version": "1.42.0",
+  "version": "1.45.0",
   "publisher": "DoubleGeste",
   "license": "MIT",
   "engines": {
@@ -104,6 +104,11 @@
           "type": "boolean",
           "default": true,
           "description": "%config.omp.description%"
+        },
+        "agentStandup.reply": {
+          "type": "boolean",
+          "default": false,
+          "description": "%config.reply.description%"
         },
         "agentStandup.claudePath": {
           "type": "string",

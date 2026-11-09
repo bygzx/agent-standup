@@ -82,6 +82,7 @@
   @media (min-width:900px) { body.rost:not(.tree):not(.board) #roster { display:flex } }
   #roster:focus-visible { outline:2px solid var(--accent); outline-offset:-2px }   /* the first stop of the Tab key */
   #roster h3 { margin:2px 6px 4px; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--dim) }
+  #roster h3 .rnm { float:right; background:none; border:0; padding:0 3px; border-radius:4px; color:var(--dim); font:inherit; font-size:12px; line-height:1.2; cursor:pointer } #roster h3 .rnm:hover, #roster h3 .rnm:focus-visible { color:var(--accent) } #dren { margin-left:auto; margin-right:4px }   /* ✎: rename the agents (⚙ → All settings → Sub-agent names) */
   .rr { display:flex; flex-direction:column; gap:2px; padding:6px 9px; border-radius:9px; border-left:3px solid transparent; background:var(--panel2); cursor:pointer; min-width:0 }
   .rr:hover { background:#2a2f45 } .rr.sel { outline:1px solid var(--accent) }
   .rr .n { display:flex; align-items:center; gap:7px; min-width:0 } .rr .dot { width:9px; height:9px; border-radius:50%; flex:none } .rr b { font-size:12.5px } .rr .ro { color:var(--dim); font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0 }
@@ -131,7 +132,7 @@
   .tile.oops { animation:oops .5s } @keyframes oops { 20% { transform:translateX(-5px) rotate(-1.2deg); box-shadow:0 0 0 3px rgba(255,82,82,.6) } 50% { transform:translateX(5px) rotate(1.2deg) } 80% { transform:translateX(-2px) } }
   .confetti { position:absolute; top:-12px; width:8px; height:12px; z-index:7; pointer-events:none; animation:fall 2.4s ease-in forwards } @keyframes fall { to { transform:translateY(105vh) rotate(720deg); opacity:.9 } }
   .prop { position:absolute; top:26px; left:8px; font-size:26px; z-index:3; pointer-events:none; filter:drop-shadow(0 2px 4px rgba(0,0,0,.5)) } .prop:empty { display:none }
-  .prop.blocked { animation:handup .7s ease-in-out infinite; transform-origin:70% 90% } @keyframes handup { 50% { transform:rotate(-24deg) translateY(-3px) } }
+  .prop.blocked { pointer-events:auto; animation:handup .7s ease-in-out infinite; transform-origin:70% 90% } @keyframes handup { 50% { transform:rotate(-24deg) translateY(-3px) } }
   .prop.stalled { animation:shake .5s ease-in-out infinite } @keyframes shake { 25% { transform:translateX(-3px) } 75% { transform:translateX(3px) } }
   .prop.waiting { animation:tick 2.4s ease-in-out infinite } @keyframes tick { 50% { transform:rotate(180deg) } }
   .prop.cheer { animation:cheer 1.1s ease-out both } @keyframes cheer { 0% { transform:scale(.3) translateY(10px); opacity:0 } 40% { transform:scale(1.25); opacity:1 } 100% { transform:translateY(-14px); opacity:0 } }
@@ -217,6 +218,12 @@
   .row .txt { color:#c3c6d4; word-break:break-word } .row.order .who { color:var(--gold) } .row.report .who { color:var(--ok) }
   footer { display:none; height:44px; flex:none; align-items:center; gap:12px; padding:0 14px; border-top:1px solid var(--line) }
   body.replay footer { display:flex }
+  #say { display:none; flex:1; min-width:0; align-items:flex-end; gap:8px } body.can-say:not(.replay) footer { display:flex; height:auto; min-height:44px; padding:6px 14px } body.can-say:not(.replay) footer > :not(#say) { display:none } body.can-say:not(.replay) #say { display:flex }   /* live: the footer row is the human's line; replay: the seek bar */
+  #say label { flex:none; align-self:center; color:var(--dim); font-size:12px; white-space:nowrap; max-width:30vw; overflow:hidden; text-overflow:ellipsis }
+  #sayT { flex:1; min-width:0; min-height:44px; max-height:96px; resize:none; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font:inherit; font-size:14px; line-height:1.4 } #sayT:focus { border-color:var(--accent) } #sayT:disabled { opacity:.5; cursor:not-allowed }
+  #sayB { flex:none; min-width:44px; min-height:44px; background:var(--accent); color:#0b1020; font-weight:700; border:0; border-radius:8px; padding:0 14px; cursor:pointer } #sayB:disabled { opacity:.5; cursor:not-allowed } #sayB.busy { cursor:progress; position:relative; color:transparent } #sayB.busy::after { content:''; position:absolute; left:50%; top:50%; width:16px; height:16px; margin:-8px 0 0 -8px; border:2px solid #0b1020; border-right-color:transparent; border-radius:50%; animation:saySpin .7s linear infinite } @keyframes saySpin { to { transform:rotate(360deg) } } @media (prefers-reduced-motion:reduce) { #sayB.busy::after { animation:none } }
+  #sayS { flex-basis:100%; font-size:12px; color:var(--dim) } #sayS.err { color:var(--red) } #sayS:empty { height:0; margin-top:-8px } #say { flex-wrap:wrap }
+  @media (max-width:520px) { #say label { flex-basis:100%; max-width:none; align-self:flex-start; font-size:11.5px } }   /* phone: the recipient sits on its own line above the field */
   input[type=range] { accent-color:var(--accent) } #seek { flex:1; min-width:40px } #pos, footer label.dim { white-space:nowrap; flex:none } @media (max-width:520px) { footer { gap:8px; padding:0 8px } footer label.dim { display:none } }   /* narrow: the 1× 2× 4× 8× buttons are the speed control */
   @media (max-width:760px) { aside { position:absolute; right:0; top:0; bottom:0; z-index:6; box-shadow:-10px 0 30px rgba(0,0,0,.5) } .brand small { display:none } }
   @media (max-width:720px) { .brand b { display:none } }
@@ -259,8 +266,8 @@
   .ticker { display:none; position:absolute; left:6px; right:6px; bottom:30px; font:10.5px/1.3 ui-monospace,Menlo,monospace; color:#fff; background:rgba(15,20,35,.8); border-radius:5px; padding:2px 7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
   .ticker.on { display:block } .ticker i { font-style:normal; color:#ffd24a } .ticker.flash { animation:flash .25s } @keyframes flash { from { background:#3b5bdb } }
   /* character animation: all state-driven from the tile's classes */
-  .fig { transform-origin:50px 76px; animation:bob 4.4s ease-in-out infinite; animation-delay:var(--d,0s) }   /* the endless motions are moved by one clock in the script (IDLE_ANIMS), not 60 times a second by the browser */ @keyframes bob { 50% { transform:translateY(-.9px) } }
-  .tile.speaking .fig { animation:talk .46s ease-in-out infinite } .tile.speaking .fig.still { animation:bob 4.4s ease-in-out infinite; animation-delay:var(--d,0s) }   /* a character with a head of its own: the body does not squash, the head nods */
+  .fig { transform-origin:50px 76px; animation:bob var(--bd,4.4s) ease-in-out infinite; animation-delay:var(--d,0s) }   /* the endless motions are moved by one clock in the script (IDLE_ANIMS), not 60 times a second by the browser */ @keyframes bob { 50% { transform:translateY(-.9px) } }
+  .tile.speaking .fig { animation:talk .46s ease-in-out infinite } .tile.speaking .fig.still { animation:bob var(--bd,4.4s) ease-in-out infinite; animation-delay:var(--d,0s) }   /* a character with a head of its own: the body does not squash, the head nods */
   .chead { transform-origin:50px 44px } .tile.speaking .chead, #pcam.speaking .chead { animation:nod .6s ease-in-out infinite } @keyframes nod { 35% { transform:rotate(-.25deg) translateY(-.18px) } 75% { transform:rotate(.15deg) } }   /* very light: the mouth does the talking */ @keyframes talk { 50% { transform:scale(1.025,.985) translateY(-.5px) } }
   .tile.vanishing { pointer-events:none; z-index:3; animation:vanish 1.2s cubic-bezier(.45,0,.75,.35) forwards }
   @keyframes vanish { 0% { filter:none; transform:none; opacity:1 } 16% { filter:brightness(1.7) saturate(1.5); transform:scale(1.05) } 55% { filter:brightness(2.3) blur(1.5px); transform:scale(.88) rotate(-3deg); opacity:.85 } 100% { filter:brightness(3.4) blur(11px); transform:scale(.12) rotate(11deg); opacity:0 } }
@@ -271,12 +278,13 @@
   .toast.offer { pointer-events:auto; animation:none; display:flex; align-items:center; gap:8px; padding:4px 6px 4px 12px; order:9 } .toast.offer .btn { padding:3px 10px; font-size:12px; white-space:nowrap } .toast.offer .ic { font-size:11px; padding:2px 6px }
 #packNoteI { width:48px; height:36px; border-radius:4px; object-fit:cover; flex:none; cursor:pointer; margin-left:-6px }   /* the offer of the real voices: stays until answered, under the passing toasts */
   .toast { background:rgba(27,29,39,.92); border:1px solid var(--line); border-radius:99px; padding:5px 12px; font-size:12px; animation:toast 3s ease forwards } @keyframes toast { 0% { opacity:0; transform:translateY(6px) } 10%, 80% { opacity:1; transform:none } 100% { opacity:0 } }
-  .eye { transform-box:fill-box; transform-origin:center; animation:blink 4.6s infinite; animation-delay:var(--d,0s) } @keyframes blink { 0%,94%,100% { transform:scaleY(1) } 97% { transform:scaleY(.08) } }
+  .eye { transform-box:fill-box; transform-origin:center; animation:blink var(--kd,4.6s) infinite; animation-delay:var(--d,0s) } @keyframes blink { 0%,94%,100% { transform:scaleY(1) } 97% { transform:scaleY(.08) } }
   .brow { transform-box:fill-box; transform-origin:center; transition:transform .25s } .tile.speaking .brow { animation:brow .7s ease-in-out infinite } @keyframes brow { 50% { transform:translateY(-1.1px) } }
   .tile.working .brow.l { transform:rotate(13deg) translateY(.5px) } .tile.working .brow.r { transform:rotate(-13deg) translateY(.5px) } .tile.working .pupil { transform:translateY(1.2px) }
-  .arm.l { transform-origin:27px 48px } .arm.r { transform-origin:73px 48px } .tile.speaking .arm.r { animation:wave .7s ease-in-out infinite } @keyframes wave { 50% { transform:rotate(-34deg) } }
-  .tile.working .arm { display:none } .tile .laptop, .tile .hands, .tile .sparks, .tile .grin, .tile .eyes-happy, .tile .mouth { display:none }
+  .arm { transition:transform .35s ease } .arm.l { transform-origin:27px 48px } .arm.r { transform-origin:73px 48px } .tile.speaking .arm.r { animation:wave .7s ease-in-out infinite } @keyframes wave { 50% { transform:rotate(-34deg) } }
+  .tile.working .arm.l { transform:rotate(-24deg) } .tile.working .arm.r { transform:rotate(24deg); animation:none }   /* at work the arms reach in, behind the laptop */ .tile .laptop, .tile .hands, .tile .sparks, .tile .grin, .tile .eyes-happy, .tile .mouth { display:none }
   .tile.working .laptop, .tile.working .hands, .tile.done .sparks, .tile.done .eyes-happy { display:inline } .tile.done .eyes-open { display:none }
+  .tile .eyes-open { transition:transform .45s ease; transform:translate(calc(var(--lx,0) * 1.4px), calc(var(--ly,0) * .9px)) } .tile.working .eyes-open { transform:translate(0,0) }   /* the others glance at whoever speaks (gaze()); one move per line, not an endless animation; at work, eyes on the laptop */
   .tile.speaking .mouth { display:inline } .tile.speaking .smile, .tile.speaking .grin { display:none } .tile.done:not(.speaking) .smile { display:none } .tile.done:not(.speaking) .grin { display:inline }
   .hand { animation:type .34s ease-in-out infinite } .hand.r { animation-delay:-.17s } .tile.working .chand { animation:type .34s ease-in-out infinite } .tile.working .chand.r { animation-delay:-.17s }
   .claptop { display:none } .claptop.on, .tile.lap .claptop { display:inline } .tile.lap .claptop { animation:lapin .5s cubic-bezier(.2,.8,.3,1) } .tile.lapout .claptop { animation:lapout .45s ease-in forwards }   /* a laptop pulled out from under the desk, and put away */
@@ -285,6 +293,14 @@
   .drift { animation:drift 24s ease-in-out infinite alternate } @keyframes drift { to { transform:translateX(9px) } }
   .steam { animation:steam 2.6s ease-in-out infinite } @keyframes steam { 50% { transform:translateY(-1.4px); opacity:.25 } }
   .tile.done .sparks path { animation:tw 1.6s ease-in-out infinite }
+  /* one-shot moves (oneShot()), never endless: the lid opens and closes, the hands come to the keyboard once it is open, arms up when the work is done, a nod, raised eyebrows, a breath before the first word, the mouth settling into a smile, a stretch */
+  .lid { transform-origin:50px 64px } .tile.working .lid { animation:lidup .45s cubic-bezier(.2,.8,.3,1) } .tile.lidshut .laptop { display:inline } .tile.lidshut .lid { animation:lidshut .38s ease-in forwards } .tile.working .hands { animation:handsin .3s ease-out .25s both }
+  @keyframes lidup { from { transform:scaleY(.06) } } @keyframes lidshut { to { transform:scaleY(.06) } } @keyframes handsin { from { opacity:0; transform:translateY(2px) } }
+  .tile.yay .arm.l { animation:yayl .9s ease-in-out } .tile.yay .arm.r { animation:yayr .9s ease-in-out } .tile.yay:not(.speaking) .fig { animation:hop .7s ease-out } @keyframes yayl { 35%, 65% { transform:rotate(58deg) } } @keyframes yayr { 35%, 65% { transform:rotate(-58deg) } } @keyframes hop { 30% { transform:translateY(-2.4px) } 55% { transform:none } 75% { transform:translateY(-.8px) } }
+  .tile.nod1:not(.speaking) .fig { animation:nod1 .75s ease-in-out } @keyframes nod1 { 30% { transform:translateY(1px) rotate(.5deg) } 60% { transform:translateY(-.4px) } }
+  .tile.stretch:not(.speaking) .fig { animation:stretch 1.2s ease-in-out } @keyframes stretch { 40% { transform:scale(1.03,.97) translateY(.6px) } 65% { transform:scale(.98,1.035) translateY(-1.2px) } }
+  .tile.inhale .brow { animation:browup .34s ease-out } .tile.wow .brow { animation:wow 1.1s ease-out } @keyframes browup { 50% { transform:translateY(-1.8px) } } @keyframes wow { 20%, 70% { transform:translateY(-1.9px) } }
+  .tile.settle .smile, .tile.settle .grin { transform-box:fill-box; transform-origin:center; animation:settle .35s ease-out } @keyframes settle { from { transform:scale(.55,1.8) } }
   @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important } .confetti, .fly { display:none !important } }
   .tile:focus-visible, .rr:focus-visible, .bcard:focus-visible { outline:2px solid var(--accent); outline-offset:2px }
   .fly { position:fixed; left:0; top:0; font-size:28px; z-index:8; pointer-events:none; filter:drop-shadow(0 3px 4px rgba(0,0,0,.5)) }
@@ -301,7 +317,8 @@
   .coffee-btn { color:#ffd24a !important; background:rgba(255,210,74,.12); box-shadow:inset 0 0 0 1px rgba(255,210,74,.35) } .coffee-btn:hover { background:rgba(255,210,74,.22) !important }
   .glink { color:var(--dim); font-size:12.5px; text-decoration:underline; text-underline-offset:3px } .glink:hover { color:#ffd24a }
   #mCoffee { background:rgba(255,210,74,.10); box-shadow:inset 0 0 0 1px rgba(255,210,74,.3); margin-top:4px } #mCoffee:hover { background:rgba(255,210,74,.2) }
-  #menuQ, #logQ, #leadName { background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:6px 9px; font:inherit; font-size:12.5px; outline:none } #menuQ:focus, #logQ:focus, #leadName:focus { border-color:var(--accent) } #leadName { width:100%; margin:2px 0 6px } #leadName:disabled { opacity:.6 } #leadHint { font-size:11.5px; margin:-2px 0 6px }
+  #menuQ, #logQ, #leadName, #projectLeadName { background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:6px 9px; font:inherit; font-size:12.5px; outline:none } #menuQ:focus, #logQ:focus, #leadName:focus, #projectLeadName:focus { border-color:var(--accent) } #leadName, #projectLeadName { width:100%; margin:2px 0 6px } #leadName:disabled, #projectLeadName:disabled { opacity:.6 } #leadHint, #projectLeadHint, #subNamesHint { overflow-wrap:anywhere; font-size:11.5px; margin:-2px 0 6px }
+  #subNames { width:100%; min-height:54px; margin:2px 0 6px; resize:vertical; background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:6px 9px; font:inherit; font-size:12.5px; outline:none } #subNames:focus { border-color:var(--accent) } #subFill { font-size:11.5px; padding:3px 9px; margin:0 0 6px }
   #switcher { position:fixed; inset:0; z-index:20; background:rgba(5,6,12,.7); display:flex; align-items:flex-start; justify-content:center; padding-top:12vh } #switcher .sbox { width:min(560px,92vw); background:var(--panel); border:1px solid var(--line); border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.6); overflow:hidden }
   #swq { width:100%; border:0; border-bottom:1px solid var(--line); background:transparent; color:var(--text); font:inherit; font-size:15px; padding:14px 16px; outline:none } #swl { max-height:50vh; overflow:auto } .swr { display:grid; grid-template-columns:auto 1fr; gap:2px 10px; padding:9px 14px; cursor:pointer; align-items:center } .swr.on, .swr:hover { background:var(--panel2) } .swr b { font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap } .swr i { grid-column:2; font-style:normal; font-size:11px; color:var(--dim) }
   #sps { display:none; gap:2px; flex:none } body.replay #sps { display:inline-flex } #sps button { background:var(--panel2); color:var(--dim); border:1px solid var(--line); border-radius:6px; padding:1px 6px; font:inherit; font-size:11px; cursor:pointer } #sps button.on { color:var(--text); border-color:var(--accent) }
@@ -393,6 +410,7 @@
   <div class="hint" id="trHint" style="display:none"></div>
   <h4 data-fr="Son" data-en="Sound">Son</h4>
   <button class="mi" data-t="voice"><span data-fr="Voix des agents" data-en="Agent voices">Voix des agents</span><i class="sw"></i></button>
+  <button class="mi" data-t="zen"><span data-fr="Mode zen : les alertes, sans les voix" data-en="Zen mode: alerts, no voices">Mode zen : les alertes, sans les voix</span><i class="sw"></i></button>
   <div class="box" id="voiceVolBox" style="display:none"><input id="voiceVol" type="range" min="0.05" max="1" step="0.05" style="width:100%" aria-label="Voice volume"></div>
   <div class="box" id="vstyleBox"><label class="lbl" for="vstyle" data-fr="Style des voix" data-en="Voice style">Style des voix</label><select id="vstyle"></select><div class="hint" id="vstyleTip" style="padding:6px 0 0;display:none" data-fr="Pour la meilleure expérience, choisissez les voix naturelles." data-en="For the best experience, pick the natural voices.">Pour la meilleure expérience, choisissez les voix naturelles.</div></div>
   <div class="box" id="kokoroBox" style="display:none"><button class="btn" id="kokoroInstall" style="width:100%"></button><div class="hint" id="kokoroHint" style="padding:2px 0 6px"></div></div>
@@ -435,8 +453,10 @@
 <button class="mi" data-t="notify"><span data-fr="Me prévenir quand les agents ont fini" data-en="Notify me when agents finish">Me prévenir quand les agents ont fini</span><i class="sw"></i></button>
   <h4 data-fr="Personnages" data-en="Characters">Personnages</h4>
   <button class="mi" data-t="customLaptop"><span data-fr="Ordinateur devant vos personnages" data-en="Laptop in front of your own characters">Ordinateur devant vos personnages</span><i class="sw"></i></button>
-  <button class="mi" data-t="ownNames"><span data-fr="Garder les noms de mes agents" data-en="Keep my agents’ own names">Garder les noms de mes agents</span><i class="sw"></i></button>
   <div class="box" id="leadBox"><div class="lbl"><span data-fr="Nom de l’agent principal" data-en="Lead agent name">Nom de l’agent principal</span></div><input id="leadName" type="text" maxlength="48" placeholder="Margot" autocomplete="off" spellcheck="false" aria-label="Lead agent name"><div class="dim" id="leadHint" style="display:none"></div></div>
+  <div class="box" id="projectLeadBox"><label class="lbl" for="projectLeadName" data-fr="Nom pour ce projet" data-en="Name for this project">Nom pour ce projet</label><input id="projectLeadName" type="text" maxlength="48" autocomplete="off" spellcheck="false" aria-describedby="projectLeadHint"><div class="dim" id="projectLeadHint"></div></div>
+  <div class="box" id="subNamesBox"><label class="lbl" for="subNames" data-fr="Noms des sous-agents" data-en="Sub-agent names">Noms des sous-agents</label><textarea id="subNames" rows="2" maxlength="2000" autocomplete="off" spellcheck="false" aria-describedby="subNamesHint"></textarea><button class="btn" id="subFill" type="button" style="display:none" data-fr="Partir des noms de l’appel" data-en="Start from the names in the call">Partir des noms de l’appel</button><div class="dim" id="subNamesHint"></div></div>
+  <button class="mi" data-t="ownNames"><span data-fr="Garder les noms de mes agents" data-en="Keep my agents’ own names">Garder les noms de mes agents</span><i class="sw"></i></button>
   </div><div class="pcol">
   <h4 data-fr="Affichage" data-en="Display">Affichage</h4>
   <button class="mi" data-t="roster"><span data-fr="Liste des agents (à gauche)" data-en="Agents list (left)">Liste des agents (à gauche)</span><i class="sw"></i></button>
@@ -467,7 +487,7 @@
     <div id="toasts" role="status" aria-live="polite"><div class="toast offer" id="vOffer" style="display:none"><span id="vOfferT"></span><button class="btn" id="vOfferB"></button><button class="ic" id="vOfferX" aria-label="Close">✕</button></div><div class="toast offer" id="packNote" style="display:none"><img id="packNoteI" src="pack-halloween.jpg" alt="" width="48" height="36"><span id="packNoteT"></span><button class="btn" id="packNoteB"></button><button class="ic" id="packNoteX" aria-label="Close">✕</button></div><div class="toast offer" id="trNote" style="display:none"><span id="trNoteT"></span><button class="btn" id="trNoteOk"></button><button class="btn" id="trNoteOff"></button></div></div><div id="visit" role="status" aria-live="polite"></div><div id="askc" role="region" aria-live="polite"></div>
     <div id="empty"><h2 id="eT"></h2><p id="eP"></p><div id="eMiss"></div><button class="cta" id="eDemo"></button></div>
     <div id="gate"><button class="cta" id="gB"></button></div>
-    <div id="detail"><div class="hd"><b id="dname"></b><button class="ic" id="dclose">✕</button></div><div id="dbody"></div></div>
+    <div id="detail"><div class="hd"><b id="dname"></b><button class="ic" id="dren" type="button">✎</button><button class="ic" id="dclose">✕</button></div><div id="dbody"></div></div>
   </section>
   <aside><h2 id="logH" data-fr="Transcription" data-en="Transcript">Transcript</h2><input id="logQ" type="search" placeholder="Search…" aria-label="Search the transcript" style="margin:8px 10px;width:calc(100% - 20px)"><div id="log"></div></aside>
 </main>
@@ -475,6 +495,7 @@
   <input id="seek" type="range" min="0" max="0" value="0"><span class="dim" id="pos">0 / 0</span>
   <label class="dim"><span data-fr="Vitesse" data-en="Speed">Vitesse</span> <input id="speed" type="range" min="0.5" max="8" step="0.25" value="1.25" style="width:80px;vertical-align:middle"></label>
   <span id="sps" class="dim" role="group" aria-label="Speed presets"><button data-s="1">1×</button><button data-s="2">2×</button><button data-s="4">4×</button><button data-s="8">8×</button></span>
+  <form id="say" autocomplete="off"><label for="sayT" id="sayL"></label><textarea id="sayT" rows="1" enterkeyhint="send" maxlength="4000"></textarea><button id="sayB" type="submit"></button><div id="sayS" role="status" aria-atomic="true"></div></form>
 </footer>
 <div id="card"></div><div id="recap"><div class="box"></div></div>
 
@@ -508,6 +529,7 @@ const APP = window.AS_APP && typeof window.AS_APP === 'object' && typeof window.
 
 let prefs = { lang: 'en', voice: true, roster: false, banter: true, reactions: false, office: false, officeVol: 0.8, vstyle: 'kokoro', notify: false, epi: false, vanish: true, music: false, station: 'fip', musicVol: 0.35, view: 'call', hideCode: false, ownNames: true, visits: true, askCard: false, followTab: true, files: true, callTr: true, voiceVol: 1 };
 const PREF_DEFAULTS = { ...prefs };   // for ⚙ → All settings → Reset to defaults
+let leadProject = null;   // the project of the loaded live call or replay, supplied by the server before naming its agents
 let prefsBase = {};   // the settings file as this page last knew it: a save sends only what changed since (prefsPatch), so another window's newer choices are not written over
 { let loc = {}; try { loc = JSON.parse(localStorage.getItem('cc.prefs') || '{}') || {}; } catch {}   // the settings file (shared by every window) and this origin's copy: the more recent one wins
   const sv = window.SAVED_PREFS && typeof window.SAVED_PREFS === 'object' ? window.SAVED_PREFS : {}; prefsBase = JSON.parse(JSON.stringify(sv)); const won = (sv._t || 0) >= (loc._t || 0) && Object.keys(sv).length ? sv : loc; Object.assign(prefs, won); delete prefs._patch;   /* a tie: this window saved last, and the file holds that save merged with what the other windows changed */ if (Object.keys(won).length && !('roster' in won)) prefs.roster = true;   /* settings saved before the list could be turned off: it stays as they had it, on */
@@ -569,16 +591,21 @@ async function setLang(code, save) {
 // =====================================================================
 const NAMES = ['Ada','Linus','Grace','Alan','Margaret','Dennis','Barbara','Ken','Radia','Tim','Hedy','Guido','Frances','Bjarne','Katherine','Brian','Sophie','Niklaus','Annie','Donald','Joan','Edsger','Lynn','Vint','Mae','Rob','Zoe','Ivan','Nina','Otto','Lena','Hugo','Ines','Théo','Maya','Jules','Alma','Remy','Cleo','Noah','Iris','Leo','Mira','Axel','Nora','Eli','Lou','Gaby'];
 const nameBook = {};   // agent id → unique first name within the session
-// The lead's name: Margot, or the one chosen in ⚙ → All settings (prefs.leadName) or in the editor (agentStandup.leadName, which wins: AS_APP.lead, see appKind in server.js). Plain text of 24 characters at most: it is written into the page in many places.
+// The lead's name: Margot, the global default, the current project override, or the name in the editor (agentStandup.leadName, which wins: AS_APP.lead, see appKind in server.js). Plain text of 24 characters at most: it is written into the page in many places.
 // typeof: the landing page reuses this section and has neither prefs nor APP
 const LEAD_NAME = 'Margot', cleanLead = (v) => Array.from(String(v == null ? '' : v).replace(/'/g, '’').replace(/[\u0000-\u001f\u007f-\u009f<>&"`\\]/g, '').replace(/\s+/g, ' ').trim()).slice(0, 24).join('').trim();
-const leadName = () => (typeof APP === 'object' && APP && cleanLead(APP.lead)) || (typeof prefs === 'object' && prefs && cleanLead(prefs.leadName)) || LEAD_NAME;
+// One top-level preference per project: the existing prefsPatch merges independent window edits without replacing a shared map.
+const projectLeadKey = () => typeof leadProject === 'object' && leadProject ? 'leadName:' + leadProject.key : '';
+const leadName = () => (typeof APP === 'object' && APP && cleanLead(APP.lead)) || (typeof prefs === 'object' && prefs && (cleanLead(prefs[projectLeadKey()]) || cleanLead(prefs.leadName))) || LEAD_NAME;
 const isLeadName = (n) => { const l = leadName().toLocaleLowerCase(), s = String(n || '').toLocaleLowerCase(); return !!n && (s === l || (s.startsWith(l + ' ') && /^\d+$/.test(s.slice(l.length + 1)))); };   // whatever the capitals: Ivan and ivan would read as one agent, and Ivan 2 as a fork of the lead
+// Your own names for the sub-agents (⚙ → All settings → Sub-agent names, prefs.subNames: names separated by commas), given in your order instead of the built-in list. Parsed again only when the text changes
+let subListMemo = { text: null, list: [] };
+const subNameList = () => { const t = typeof prefs === 'object' && prefs && typeof prefs.subNames === 'string' ? prefs.subNames : ''; if (t !== subListMemo.text) { const seen = new Set(), list = []; for (const v of t.split(/[,;\n]+/)) { const n = cleanLead(v), k = n.toLocaleLowerCase(); if (n && !seen.has(k) && list.length < 200) { seen.add(k); list.push(n); } } subListMemo = { text: t, list }; } return subListMemo.list; };
 function uniqueName(id, h) {
-  if (nameBook[id]) return nameBook[id]; const taken = new Set(Object.values(nameBook).map((n) => n.toLocaleLowerCase())), n0 = taken.size; taken.add(leadName().toLocaleLowerCase());   // never the lead's own name: one may be chosen from this list
-  for (let k = 0; k < NAMES.length; k++) { const n = NAMES[(h + k) % NAMES.length]; if (!taken.has(n.toLocaleLowerCase())) return (nameBook[id] = n); }
-  let b = h % NAMES.length; if (isLeadName(NAMES[b])) b = (b + 1) % NAMES.length;   // every name taken: a number after it, but never after the lead's name ("Ivan 48" would read as a fork of a lead called Ivan)
-  return (nameBook[id] = NAMES[b] + ' ' + (n0 + 1));
+  if (nameBook[id]) return nameBook[id]; const taken = new Set(Object.values(nameBook).map((n) => n.toLocaleLowerCase())); taken.add(leadName().toLocaleLowerCase());   // never the lead's own name: one may be chosen from this list
+  const own = subNameList().filter((n) => !isLeadName(n)), pool = own.length ? own : NAMES, at = own.length ? 0 : h;   // your list: its names in your order; the built-in one: a name drawn from the agent's id
+  for (let k = 0; k < pool.length; k++) { const n = pool[(at + k) % pool.length]; if (!taken.has(n.toLocaleLowerCase())) return (nameBook[id] = n); }
+  for (let r = 2; ; r++) for (let k = 0; k < pool.length; k++) { const b = pool[(at + k) % pool.length]; if (isLeadName(b)) continue; const n = b + ' ' + r; if (!taken.has(n.toLocaleLowerCase())) return (nameBook[id] = n); }   // every name taken: Ada 2, Linus 2… then Ada 3, never after the lead's name ("Ivan 2" would read as a fork of a lead called Ivan); the pool always holds a name that is not the lead's
 }
 const PAL = ['#ff7a6b','#ffb347','#ffd84a','#4fd1a5','#4cc3ff','#7c8cff','#b583ff','#ff7eb6'];
 const hexRGB = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -589,7 +616,7 @@ const CHAR_CHOICES = ['none', 'folder', 'cats', 'halloween'];   // what ⚙ → 
 let SHOP = {};   // the packs of the shop, by name, as the server knows them: how many characters are here (none until it is bought), its price, the code of the purchase
 const toData = (url) => fetch(url).then((r) => r.blob()).then((b) => new Promise((res) => { const f = new FileReader(); f.onload = () => res(f.result); f.readAsDataURL(b); }));
 const imgSize = (src) => new Promise((res) => { const i = new Image(); i.onload = () => res([i.naturalWidth, i.naturalHeight]); i.onerror = () => res([0, 0]); i.src = src; }), isDrawing = (wh) => Math.max(wh[0], wh[1]) > 128;   // a large image is a drawing, shown smooth; pixel art (32 or 64 px) keeps its hard pixels
-const youMode = () => prefs.charYou || (prefs.charPack === 'none' ? 'vampire' : 'cast');   // who you are: the cast's own human, or the vampire of the Halloween pack, everyone's and free (the default with the drawn characters, so that everyone meets the pack)
+const youMode = () => prefs.charYou || (prefs.charPack === 'none' && new Date().getMonth() === 9 ? 'vampire' : 'cast');   // who you are: the cast's own human, or the vampire of the Halloween pack, everyone's and free (the default with the drawn characters in October only, so that everyone meets the pack; the rest of the year a choice in ⚙ → Characters, kept once picked)
 let VAMP = null;   // the free vampire (examples/vampire), loaded once
 async function charEntry(base, c) {   // one character of a folder or a pack, ready to draw: its pictures as data, their sizes, what it may wear
   const e = { name: c.stem, idle: await toData(base + encodeURIComponent(c.file)), talk: c.talk ? await toData(base + encodeURIComponent(c.talk)) : null, bg: c.bg ? await toData(base + encodeURIComponent(c.bg)) : null, desks: await Promise.all((c.desks || []).map((f) => toData(base + encodeURIComponent(f)))), hands: c.hands ? await toData(base + encodeURIComponent(c.hands)) : null, head: c.head ? await toData(base + encodeURIComponent(c.head)) : null };
@@ -612,11 +639,18 @@ async function loadChars() {
   if (youMode() === 'vampire') { try { VAMP = VAMP || (await vampEntry()); if (VAMP) { next.you = VAMP; next.youFrom = 'vampire'; } } catch {} }
   CHARS = next;
 }
-const customFor = (id) => {   // sub-agents: the best-hashed image no other agent holds; the whole pool again only once every image is taken
+const charKey = (s) => String(s || '').split(':').pop().toLowerCase().replace(/[\s_\-]+/g, '-').replace(/^-+|-+$/g, '');   // "QA Agent", qa_agent, plugin:qa-agent → qa-agent
+const STOCK_TYPE = /^(main|general-purpose|explore|plan|claude|agent|task|fork|default|worker|explorer|subagent|workflow-subagent|statusline-setup|output-style-setup|claude-code-guide|verification|magic-docs)$/i;   // the types the tools ship (as STOCK_AGENT in server.js, with the lead's main and Codex's roles): not names, so agent.png or explore.png stays a picture for anyone
+const agentKeys = (a) => (a ? [!STOCK_TYPE.test(String(a.type || '').split(':').pop()) && a.type, a.own && a.own.replace(/ \d+$/, '')] : []).map(charKey).filter(Boolean);   // its type (.claude/agents/qa.md) and the name it was launched with; "Qa 2", the second of its name, is still qa
+const wears = (c, keys) => { const s = c.key || (c.key = charKey(c.name)), m = s.match(/^(.+)-(\d+|[a-z])$/); return keys.has(s) || !!(m && keys.has(m[1])); };   // qa.png, and qa-2.png or qa-f.png for other looks of the same agent; qa-lead.png is a character of its own
+const customFor = (id, a = S.agents[id]) => {   // sub-agents: an image named after the agent; otherwise the best-hashed image no other agent holds; the whole pool again only once every image is taken
   if (id === 'main') return CHARS.lead; if (id === 'user') return CHARS.you; if (!CHARS.pool.length) return null;
-  const used = new Set(Object.keys(S.agents).filter((k) => k !== id && S.agents[k].custom).map((k) => S.agents[k].custom.name));
-  const free = CHARS.pool.filter((c) => !used.has(c.name)), varied = CHARS.pool.filter((c) => c.extras && Object.keys(c.extras).some((k) => !/^sticker/.test(k))), from = free.length ? free : varied.length ? varied : CHARS.pool;   // varied: what the character itself wears (a hat, glasses), not the stickers of its laptop   // every image taken: one that has extras (a hat, glasses…) is given again, since it does not look the same twice
-  return from.reduce((b, c) => (hash(id + '|' + c.name) > hash(id + '|' + b.name) ? c : b));   // by the character's name, not its picture: a pack drawn again gives each agent the same character
+  const others = Object.keys(S.agents).filter((k) => k !== id), used = new Set(others.filter((k) => S.agents[k].custom).map((k) => S.agents[k].custom.name)), pick = (l) => l.reduce((b, c) => (hash(id + '|' + c.name) > hash(id + '|' + b.name) ? c : b));   // by the character's name, not its picture: a pack drawn again gives each agent the same character
+  const keys = new Set(agentKeys(a)), mine = keys.size ? CHARS.pool.filter((c) => wears(c, keys)) : [];
+  if (mine.length) { const f = mine.filter((c) => !used.has(c.name)); return pick(f.length ? f : mine); }   // its own picture even when another agent of the same name wears it: two QAs both look like the QA
+  const theirs = new Set([...others.map((k) => S.agents[k]), ...(S.soon || []).filter((x) => x.id !== id)].flatMap(agentKeys)), left = CHARS.pool.filter((c) => !wears(c, theirs)), pool = left.length ? left : CHARS.pool;   // nor does an agent without one take the picture of another agent in the call, or of one arriving with it (S.soon: a call opened late knows its QA before the agents born earlier get their pictures)
+  const free = pool.filter((c) => !used.has(c.name)), varied = pool.filter((c) => c.extras && Object.keys(c.extras).some((k) => !/^sticker/.test(k))), from = free.length ? free : varied.length ? varied : pool;   // varied: what the character itself wears (a hat, glasses), not the stickers of its laptop   // every image taken: one that has extras (a hat, glasses…) is given again, since it does not look the same twice
+  return pick(from);
 };
 // ---- the shop: a pack that is sold. The page never sees a card: the button asks the app's server for a payment page (Stripe's, through the website), opens it, and then asks for the pack until it is paid
 const shopSay = (t) => { const m = $('#shopMsg'); if (m) m.textContent = t; };
@@ -688,10 +722,14 @@ async function openChars() {   // ⚙ → Characters: the whole cast (drawn, a p
 }
 function renderFolder(el, mine) {   // one's own pictures: where they are, a button per role to add one, and the ones there, each with a way to take it out (moved aside, never deleted)
   const role = (c) => (c.role === 'lead' ? L('Chef', 'Lead') : c.role === 'you' ? L('Vous', 'You') : L('Sous-agent', 'Sub-agent'));
+  const subs = Object.values(S.agents).filter((p) => p.id !== 'main' && p.id !== 'user' && !p.twin), on = (c) => (CHARS.pack === 'folder' && c.role === 'agent' ? subs.filter((p) => p.custom && p.custom.name === c.stem).map((p) => p.name) : []);   // who wears each picture now, while the folder is the cast
+  const pics = mine.chars.filter((c) => c.role === 'agent').map((c) => ({ name: c.stem })), want = [...new Set(subs.map((p) => !STOCK_TYPE.test(String(p.type || '').split(':').pop()) && charKey(p.type)).filter(Boolean))].filter((k) => !pics.some((c) => wears(c, new Set([k]))));   // the agent types of the call (.claude/agents/qa.md) with no picture of their own yet: the file name to draw. Not the names agents were launched with, which change from one session to the next
+  const worn = (c) => { const w = on(c); return w.length ? ' → ' + esc(w.slice(0, 3).join(', ') + (w.length > 3 ? ' +' + (w.length - 3) : '')) : ''; };
   el.innerHTML = `${esc(L('Vos images sont dans ce dossier :', 'Your pictures are in this folder:'))} <code style="word-break:break-all">${esc(mine.dir || CHARS.dir || '')}</code>
     <div class="slots">${[['you', L('Vous', 'You')], ['lead', L('Chef', 'Lead')], ['agent', L('Sous-agents', 'Sub-agents')]].map(([r, t]) => `<div class="slot"><b>${esc(t)}</b><button class="btn" data-add="${r}">${esc(r === 'agent' ? L('Ajouter des images', 'Add pictures') : L('Choisir une image', 'Choose a picture'))}</button>${r !== 'agent' ? `<button class="btn" data-add="${r}-talk">${esc(L('Bouche ouverte (facultatif)', 'Open mouth (optional)'))}</button>` : ''}</div>`).join('')}</div>
-    <div class="mine">${mine.chars.length ? mine.chars.map((c) => `<span class="chip"><img src="/characters/${encodeURIComponent(c.file)}" alt="">${esc(c.stem)} · ${esc(role(c))}<button class="ic" data-rm="${esc(c.file)}" aria-label="${esc(L('Retirer', 'Remove'))}" title="${esc(L('Retirer', 'Remove'))}">✕</button></span>`).join('') : esc(L('Aucune image pour l’instant.', 'No picture yet.'))}</div>
-    <p class="dim" style="margin:8px 0 0;font-size:11.5px">${esc(L('lead.png = le chef · you.png = vous · les autres = les sous-agents · nom-talk.png = bouche ouverte', 'lead.png = the lead · you.png = you · others = the sub-agents · name-talk.png = open mouth'))}</p>
+    <div class="mine">${mine.chars.length ? mine.chars.map((c) => `<span class="chip"><img src="/characters/${encodeURIComponent(c.file)}" alt="">${esc(c.stem)} · ${esc(role(c))}${worn(c)}<button class="ic" data-rm="${esc(c.file)}" aria-label="${esc(L('Retirer', 'Remove'))}" title="${esc(L('Retirer', 'Remove'))}">✕</button></span>`).join('') : esc(L('Aucune image pour l’instant.', 'No picture yet.'))}</div>
+    <p class="dim" style="margin:8px 0 0;font-size:11.5px">${esc(L('lead.png = le chef · you.png = vous · les autres = les sous-agents · nom-talk.png = bouche ouverte', 'lead.png = the lead · you.png = you · others = the sub-agents · name-talk.png = open mouth'))}<br>${esc(L('qa.png = le sous-agent nommé qa (.claude/agents/qa.md) · qa-2.png = un autre de ses visages', 'qa.png = the sub-agent named qa (.claude/agents/qa.md) · qa-2.png = another look of it'))}</p>
+    ${want.length ? `<p class="dim" style="margin:6px 0 0;font-size:11.5px">${esc(L('Dans cet appel, sans image à leur nom : ', 'In this call, without a picture of their own: '))}${want.map((k) => `<code>${esc(k)}.png</code>`).join(', ')}</p>` : ''}
     <div style="display:flex;gap:6px;margin-top:8px"><button class="btn" id="charReload">${esc(L('Recharger', 'Reload'))}</button>${EMBED ? `<button class="btn" id="charOpen">${esc(L('Ouvrir le dossier', 'Open folder'))}</button>` : ''}</div>
     <div id="shopMsg" role="status" style="margin-top:6px"></div><input type="file" id="charFile" accept="image/png,image/gif,image/webp,image/jpeg" hidden>`;
   const inp = $('#charFile'), post = (p, b) => fetch(p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }).then((r) => r.json()).catch(() => ({ error: 'write' }));
@@ -714,12 +752,16 @@ function packNote() {   // the Halloween pack, to someone without it, twice a se
     : dd >= 19 ? L('Halloween approche : déguisez vos agents en citrouille, fantôme, sorcière ou squelette, dessinés à la main par Fabien Coupas.', 'Halloween is coming: dress your agents up as a pumpkin, a ghost, a witch or a skeleton, drawn by hand by Fabien Coupas.') : L('Pour Halloween, vous êtes le vampire. Le reste de l’équipe est dans le pack Halloween.', 'This Halloween, you are the vampire. The rest of the cast is in the Halloween pack.');
   $('#packNoteB').textContent = L('Voir le pack', 'See the pack') + ' · ' + price;
 }
-function persona(a) { const p = persona0(a); p.custom = customFor(p.twin ? 'main' : a.id); return p; }   // a fork wears the lead's own picture too
-const subName = (a, h) => (a.own && prefs.ownNames && !isLeadName(a.own) ? (nameBook[a.id] = a.own) : ((a.twinN || !isLeadName(a.given)) && a.given) || uniqueName(a.id, h));   /* a fork is the one agent named after the lead */   // own: the name the person gave this agent (see ownName in server.js); otherwise a first name from the list. a.own is tested first: the landing page reuses this section and has no settings
+function persona(a) { const p = persona0(a); p.custom = customFor(p.twin ? 'main' : a.id, p); return p; }   // a fork wears the lead's own picture too
+// The order agents are named in: the order they started (born, from the server), not the order their files are listed in (by their ids: effectively random). A reload, a replay and the live call then give each agent
+// the same name, a first name of your list the same agent, and a fork the same number. Without born (the demo, a session just started), the order they came in
+const byBorn = (list) => list.map((a, j) => ({ a, j })).sort((x, y) => (x.a.born || Infinity) - (y.a.born || Infinity) || x.j - y.j).map((x) => x.a);
+const ownFree = (a) => { const taken = new Set(Object.keys(nameBook).filter((k) => k !== a.id).map((k) => nameBook[k].toLocaleLowerCase())); let n = a.own; for (let r = 2; taken.has(n.toLocaleLowerCase()); r++) n = a.own + ' ' + r; return n; };   // a name of its own that another agent has already (a first name of your list, or the same name from another tool): a number after it
+const subName = (a, h) => (/^visit:/.test(a.id || '') ? (isLeadName(a.given) ? NAMES[(h + 1) % NAMES.length] : a.given) : a.own && prefs.ownNames && !isLeadName(a.own) ? (nameBook[a.id] = ownFree(a)) : ((a.twinN || (!isLeadName(a.given) && !subNameList().length)) && a.given) || uniqueName(a.id, h));   /* a visitor from another session keeps its built-in name and takes none of the call's names; a fork is the one agent named after the lead; with your own list, the names a tool gave (Codex's nicknames, the demo's) give way to it */   // own: the name the person gave this agent (see ownName in server.js); otherwise a first name from the list. a.own is tested first: the landing page reuses this section and has no settings
 function renameAll(lead) {   // ⚙ → own names on or off, or a new name for the lead: every sub-agent is named again, in the order it arrived, as a reload would name them
   const names = () => Object.values(S.agents).map((p) => p.name).join('\n'), was = names();
   if (lead) for (const p of Object.values(S.agents)) if (p.id === 'main' || p.twinN) { const q = persona(p); p.name = q.name; p.given = q.given; }   // the lead and its forks first: the others then keep clear of the lead's name
-  for (const k in nameBook) delete nameBook[k]; for (const p of Object.values(S.agents)) if (p.id !== 'main' && p.id !== 'user') p.name = p.twinN && !(p.own && prefs.ownNames && !isLeadName(p.own)) ? p.given : subName(p, hash(p.id));   // a fork is the lead's twin unless it has a name of its own to keep
+  for (const k in nameBook) delete nameBook[k]; for (const p of byBorn(Object.values(S.agents))) if (p.id !== 'main' && p.id !== 'user') p.name = p.twinN && !(p.own && prefs.ownNames && !isLeadName(p.own)) ? p.given : subName(p, hash(p.id));   // a fork is the lead's twin unless it has a name of its own to keep
   if (!lead || names() !== was) { buildStage(); renderTokens(); renderCtx(); paintStatus(); renderLog(true); syncUI(); }   // the new tiles get their tokens and context at once, not at the next usage
 }
 function persona0(a) {
@@ -796,7 +838,7 @@ function avatarSVG(p, o, uid = '') {   // uid keeps SVG ids unique per instance:
   const st = !!o, sh = SHAPES[p.shape], fy = sh.fy, top = sh.top, bot = p.shape === 4, c = p.shirt, c1 = mix(c, '#ffffff', .3), c2 = mix(c, '#000000', .2);
   const ink = bot ? '#8ff0ff' : '#2a2233', gid = uid + 'b' + p.gid, sc = SCENES[p.scene], eg = EYES[p.eye], ex = p.shape === 1 ? [43, 57] : [41.5, 58.5];
   const V = (cls, show, html) => (st ? (show ? html : '') : `<g class="${cls}">${html}</g>`);
-  const d0 = -((hash(p.id) % 45) / 10);
+  const d0 = -((hash(p.id) % 45) / 10), bd = 4 + ((hash(p.id) >>> 4) % 15) / 10, kd = 4 + ((hash(p.id) >>> 9) % 21) / 10;   // its own breathing (4 to 5.4 s) and blinking (4 to 6 s): a full call does not move in step
   const eye = (x) => `<g class="eye"><ellipse cx="${x}" cy="${fy}" rx="${eg.rx}" ry="${eg.ry}" fill="${ink}"/><g class="pupil"><circle cx="${x + 1}" cy="${fy - 1.5}" r="1.1" fill="#fff"/><circle cx="${x - 1}" cy="${fy + 1.4}" r=".55" fill="#fff" opacity=".7"/></g></g>`;
   const happy = (x) => `<path d="M${x - 3.6} ${fy + 1.4}Q${x} ${fy - 4.2} ${x + 3.6} ${fy + 1.4}" fill="none" stroke="${ink}" stroke-width="1.7" stroke-linecap="round"/>`;
   const brow = (x, s) => `<path class="brow ${s}" d="M${x - 3.6} ${fy - eg.ry - 3}q3.6-2 7.2 0" fill="none" stroke="${ink}" stroke-width="1.4" stroke-linecap="round"/>`;
@@ -808,13 +850,13 @@ function avatarSVG(p, o, uid = '') {   // uid keeps SVG ids unique per instance:
     ${V('mouth', speaking, `<ellipse class="mouthE" cx="50" cy="${my + 1}" rx="${mopen ? 4 : 4.6}" ry="${mopen ? 4.4 : .9}" fill="${bot ? '#8ff0ff' : '#4b1c2c'}"/>`)}
     ${p.glasses ? `<g fill="rgba(255,255,255,.16)" stroke="#2c2f40" stroke-width="1.1"><circle cx="${ex[0]}" cy="${fy}" r="6.2"/><circle cx="${ex[1]}" cy="${fy}" r="6.2"/><path d="M${ex[0] + 6.2} ${fy}h${ex[1] - ex[0] - 12.4}" fill="none"/></g>` : ''}`;
   const acc = ACC[p.acc](top, p.acc2, fy, sh.hw) + (p.lead ? `<path d="M${50 - sh.hw} ${fy + 5}q-2 11 13 12" fill="none" stroke="#2c2f40" stroke-width="1.2" stroke-linecap="round"/><circle cx="${50 - sh.hw + 13}" cy="${fy + 17}" r="1.9" fill="#2c2f40"/>` : '');
-  const arm = (side) => `<g class="arm ${side}"><ellipse cx="${side === 'l' ? 25 : 75}" cy="56" rx="4.6" ry="9" fill="${c2}" transform="rotate(${side === 'l' ? 12 : -12} ${side === 'l' ? 25 : 75} 56)"/></g>`;
+  const arm = (side) => `<g class="arm ${side}"${working ? ` transform="rotate(${side === 'l' ? -24 : 24} ${side === 'l' ? 27 : 73} 48)"` : ''}><ellipse cx="${side === 'l' ? 25 : 75}" cy="56" rx="4.6" ry="9" fill="${c2}" transform="rotate(${side === 'l' ? 12 : -12} ${side === 'l' ? 25 : 75} 56)"/></g>`;
   const prop = [`<path d="M11 62.4l1.6-7.4h7.2l1.6 7.4z" fill="#e07a5f"/><path d="M16 55q-6-8-2-12q5 4 2 12z" fill="#3fbf7f"/><path d="M16 55q6-7 10-5q-1 6-10 5z" fill="#53c98a"/>`,
     `<rect x="79" y="55.6" width="7.4" height="6.8" rx="1.6" fill="#f6f2ea"/><path d="M86.2 57q3.2 0 3.2 2.2t-3.2 2.2" fill="none" stroke="#f6f2ea" stroke-width="1.3"/><g class="steam" fill="none" stroke="#fff" stroke-width=".8" stroke-linecap="round" opacity=".7"><path d="M81.5 53q-1.4-1.8 0-3.4M84.3 53q-1.4-1.8 0-3.4"/></g>`,
     `<rect x="76" y="58.2" width="14" height="4.2" rx="1" fill="#ff7a6b"/><rect x="77.5" y="54.4" width="12" height="3.8" rx="1" fill="#4cc3ff"/><rect x="76.5" y="50.8" width="11" height="3.6" rx="1" fill="#ffd84a"/>`][p.prop] + (pumpkinDay() ? pumpkin(p.prop === 0 ? 83 : 17) : '');   /* on the 30th and 31st of October, a carved pumpkin on the other side of the desk */
-  const lap = `<rect x="33" y="46" width="34" height="18" rx="2.8" fill="#d3d8e6"/><rect x="33" y="46" width="34" height="18" rx="2.8" fill="url(#${uid}lg)" opacity=".5"/><circle cx="50" cy="55" r="2.3" fill="${c1}"/><rect x="29.5" y="63.4" width="41" height="3" rx="1.5" fill="#aab1c2"/>`;
+  const lap = `<g class="lid"><rect x="33" y="46" width="34" height="18" rx="2.8" fill="#d3d8e6"/><rect x="33" y="46" width="34" height="18" rx="2.8" fill="url(#${uid}lg)" opacity=".5"/><circle cx="50" cy="55" r="2.3" fill="${c1}"/></g><rect x="29.5" y="63.4" width="41" height="3" rx="1.5" fill="#aab1c2"/>`;
   const lapDark = `<rect x="33" y="46" width="34" height="18" rx="2.8" fill="#3b4152"/><rect x="33" y="46" width="34" height="18" rx="2.8" fill="url(#${uid}lg)" opacity=".18"/><circle cx="50" cy="55" r="2.3" fill="${c1}"/><rect x="29.5" y="63.4" width="41" height="3" rx="1.5" fill="#262a36"/>`;   // for custom characters: darker, so it still shows under a white or cream sprite
-  const hands = `<circle class="hand l" cx="38" cy="65.6" r="3.1" fill="${c2}"/><circle class="hand r" cx="62" cy="65.6" r="3.1" fill="${c2}"/>`;
+  const hands = `<circle class="hand l" cx="32.7" cy="59.8" r="3.1" fill="${c2}"/><circle class="hand r" cx="67.3" cy="59.8" r="3.1" fill="${c2}"/>`;   // on the keyboard, behind the lid we see from the back: only their outer sides show
   const sparks = star(22, 28, 3) + star(78, 22, 2.6, '#ff9bb8') + star(70, 40, 1.9, '#9be7ff') + star(30, 46, 1.6, '#ffe58a');
   const custFig = (c, talking, who) => { const base = c.full ? 'width="100" height="75" preserveAspectRatio="xMidYMid slice"' : 'x="20" y="6" width="60" height="58" preserveAspectRatio="xMidYMax meet"', px = c.smooth ? '' : 'image-rendering:pixelated;';
     const worn = c.extras ? Object.keys(c.extras).filter((k) => !/^sticker/.test(k)).map((k) => { const n = c.extras[k].length, i = hash(who + '+' + k) % (2 * n); return i < n ? `<image href="${c.extras[k][i]}" ${base} style="${px}"/>` : ''; }).join('') : '';   // one of each kind, or none, half of the time: always the same for a given agent
@@ -834,12 +876,12 @@ function avatarSVG(p, o, uid = '') {   // uid keeps SVG ids unique per instance:
       <linearGradient id="${uid}dk${p.scene}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sc.desk[0]}"/><stop offset="1" stop-color="${sc.desk[1]}"/></linearGradient>
       <linearGradient id="${uid}lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
     ${room ? `<clipPath id="${room}c"><rect y="62" width="100" height="13"/></clipPath><image id="${room}" href="${p.custom.bg}" width="100" height="75" preserveAspectRatio="xMidYMid slice"${p.custom.bgSmooth ? '' : ' style="image-rendering:pixelated"'}/>` : sc.svg().replace(/id="(g[a-z]\d)"/g, `id="${uid}$1"`).replace(/url\(#(g[a-z]\d)\)/g, `url(#${uid}$1)`)}
-    <g class="fig${p.custom && p.custom.head ? ' still' : ''}" style="--d:${d0}s">
+    <g class="fig${p.custom && p.custom.head ? ' still' : ''}" style="--d:${d0}s;--bd:${bd}s;--kd:${kd}s">
       ${fig}
     </g>
     ${p.custom ? custFront(p.custom, uid + 'hd' + p.gid, p.id || p.gid) : ''}
     ${room ? `<use href="#${room}" clip-path="url(#${room}c)"/>` : `<rect y="62" width="100" height="13" fill="url(#${uid}dk${p.scene})"/><rect y="62" width="100" height="1.3" fill="#fff" opacity=".38"/><rect y="63.3" width="100" height="2.6" fill="#000" opacity=".1"/>`}
-    ${room ? '' : prop}${p.custom ? (prefs.customLaptop && !(p.custom.desks && p.custom.desks.length) ? V('laptop', working, lapDark) : '') : V('laptop', working, lap) + V('hands', working, hands)}${V('sparks', done, `<g class="sparks">${sparks}</g>`)}
+    ${room ? '' : prop}${p.custom ? (prefs.customLaptop && !(p.custom.desks && p.custom.desks.length) ? V('laptop', working, lapDark) : '') : V('hands', working, hands) + V('laptop', working, lap)}${V('sparks', done, `<g class="sparks">${sparks}</g>`)}
   </svg>`;
 }
 
@@ -963,6 +1005,7 @@ function updateHint() {
 const AUD = {
   ctx: null, muted: false, live: new Set(), lastClick: 0,
   off() { return this.muted || !!S.hush || !!(S.owner && S.owner !== CID); },   // muted here, not turned on yet (S.hush: no click since the page opened), or another window holds the sound
+  calm() { return this.off() || !!prefs.zen; },   // zen mode: the alerts (done, needs you, a knock) still chime; voices, ambience, music and reaction pops are silent
   init() {
     if (this.ctx) { this.ctx.resume(); return; }
     let c; try { c = this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return; }
@@ -974,10 +1017,10 @@ const AUD = {
     const src = c.createBufferSource(); src.buffer = buf; src.loop = true; const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 500;
     const g = c.createGain(); g.gain.value = 0.3; src.connect(lp).connect(g).connect(this.sfx); src.start(); this.apply(); OFFICE.start();
   },
-  apply() { if (!this.ctx) return; this.sfx.gain.value = prefs.office && !this.off() ? 1 : 0; this.voice.gain.value = prefs.voice && !this.off() ? (prefs.voiceVol ?? 1) : 0; this.applyMusic(); RADIO.sync();  },
+  apply() { if (!this.ctx) return; this.sfx.gain.value = prefs.office && !this.calm() ? 1 : 0; this.voice.gain.value = prefs.voice && !this.calm() ? (prefs.voiceVol ?? 1) : 0; this.applyMusic(); RADIO.sync();  },
   // Music fades down quickly when an agent starts talking and comes back slowly once the room is quiet.
-  applyMusic() { if (!this.ctx) return; this.amb.gain.setTargetAtTime((this.ducked ? 0.35 : 1) * (prefs.officeVol ?? 0.8), this.ctx.currentTime, 0.25); const v = prefs.music && !this.off() ? (prefs.musicVol ?? 0.35) * (this.ducked ? 0.16 : 1) : 0; this.music.gain.setTargetAtTime(v, this.ctx.currentTime, this.ducked ? 0.12 : 0.7); },
-  blip(f) { if (!this.ctx || this.off()) return; const c = this.ctx, t = c.currentTime, o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * 1.5, t + 0.1); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.25); },
+  applyMusic() { if (!this.ctx) return; this.amb.gain.setTargetAtTime((this.ducked ? 0.35 : 1) * (prefs.officeVol ?? 0.8), this.ctx.currentTime, 0.25); const v = prefs.music && !this.calm() ? (prefs.musicVol ?? 0.35) * (this.ducked ? 0.16 : 1) : 0; this.music.gain.setTargetAtTime(v, this.ctx.currentTime, this.ducked ? 0.12 : 0.7); },
+  blip(f) { if (!this.ctx || this.calm()) return; const c = this.ctx, t = c.currentTime, o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * 1.5, t + 0.1); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.25); },
   alert() {   // a soft two-note chime for "your agents are done"; separate from the office sounds so it works with ambience off
     if (!this.ctx || this.off()) return; const c = this.ctx;
     [[784, 0], [1047, 0.16], [1319, 0.32]].forEach(([f, w]) => { const t = c.currentTime + w, o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.95); });
@@ -991,6 +1034,10 @@ const AUD = {
     if (!this.ctx || !prefs.office || performance.now() - this.lastClick < 70) return; this.lastClick = performance.now();
     const c = this.ctx, n = c.sampleRate * 0.03, b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
     const s = c.createBufferSource(); s.buffer = b; const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1800 + Math.random() * 1500; const g = c.createGain(); g.gain.value = 0.18; s.connect(hp).connect(g).connect(this.sfx); s.start();
+  },
+  need() {   // an agent needs you (a question, a permission, a plan): two quick bright double notes, sharper than the soft chime of "done", so the ear tells them apart without looking
+    if (!this.ctx || this.off()) return; const c = this.ctx;
+    [[1175, 0], [1568, 0.11], [1175, 0.34], [1568, 0.45]].forEach(([f, w]) => { const t = c.currentTime + w, o = c.createOscillator(), g = c.createGain(); o.type = 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.25); });
   },
   join() { this.tone(523, .14, 'triangle', .1); this.tone(784, .2, 'triangle', .1, .12); },
   knock() {   // someone at the door: a visitor from another session. Like the chime above, it is heard with the ambience off
@@ -1011,7 +1058,7 @@ const AUD = {
 // Office ambience, all synthesised (no audio files): keyboards that follow real activity, a coffee machine, and small room noises.
 const OFFICE = {
   nb: null, ty: [0, 1, 2].map(() => ({ n: 0, at: 0, pan: 0 })), pt: 0, prev: 0, nextCoffee: 22000, nextMisc: 9000, timer: null,
-  ok() { return AUD.ctx && prefs.office && !AUD.off() && S.playing; },
+  ok() { return AUD.ctx && prefs.office && !AUD.calm() && S.playing; },
   noise() { const c = AUD.ctx; if (!this.nb) { this.nb = c.createBuffer(1, c.sampleRate * 2, c.sampleRate); const d = this.nb.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; } return this.nb; },
   out(pan) { const c = AUD.ctx; if (!c.createStereoPanner) return AUD.amb; const p = c.createStereoPanner(); p.pan.value = pan; p.connect(AUD.amb); return p; },
   hit(t, out, o) {   // one short filtered noise burst (+ optional low thump): the building block of keys, clicks, doors, paper
@@ -1079,7 +1126,7 @@ const RADIO = {   // live web radio through WebAudio (so it can be faded when ag
       a.addEventListener('error', () => { this.err = !!this.cur; updateHint(); }); a.addEventListener('playing', () => { this.err = false; updateHint(); });
       AUD.ctx.createMediaElementSource(a).connect(AUD.music);
     }
-    const want = prefs.music && !AUD.off(), url = (STATIONS.find((s) => s.id === prefs.station) || STATIONS[0]).url;
+    const want = prefs.music && !AUD.calm(), url = (STATIONS.find((s) => s.id === prefs.station) || STATIONS[0]).url;
     if (want) { if (this.cur !== url) { this.cur = url; this.err = false; this.el.src = url; } if (this.el.paused) this.el.play().catch(() => {}); }
     else if (this.cur) { this.cur = null; this.el.pause(); this.el.removeAttribute('src'); this.el.load(); }   // stop downloading; it reconnects live next time
   },
@@ -1145,7 +1192,7 @@ function paceAt(k) {
   return { hurry, pace: Math.min(q > 7 ? 70 : q > 3 ? 130 : 260, lg > 30 ? 70 : lg > 15 ? 130 : lg > 6 ? 200 : 260), boost: hurry || S.events.length - k > 60 ? 3 : 1 };
 }
 function warmTTS(i) {   // called by run() before each line (i is that line) and when new events arrive (i is the first of them)
-  if (!TTS.server || !AUD.ctx || AUD.off() || !prefs.voice || babbles()) return;
+  if (!TTS.server || !AUD.ctx || AUD.calm() || !prefs.voice || babbles()) return;
   const fresh = i <= S.idx, from = fresh ? i : S.idx + 1, len = S.events.length, jobs = []; let n = 0; if (!fresh && !S.playing) return;   // new events while a line is being read: the lines after it are planned again, they may now be read shorter and faster
   for (let k = from; k < Math.min(len, from + 400) && n < 4;) {
     const e = S.events[k]; if (quiet(e)) { k++; continue; }
@@ -1308,7 +1355,7 @@ function sessVoice(text, ev) {   // for the lines that come from the session (ev
 }
 async function speakLine(text, p, primary, token, lo = voiceLang(text), always = false) {   // always: your own lines are voiced even when the call is behind
   captionRun(p.id, text, estMs(text));
-  if (AUD.off() || !prefs.voice) { if (!AUD.off() && prefs.office) AUD.murmur(0.5 + (p.vi % 5) / 10, estMs(text) / 1000); return sleep(estMs(text)); }
+  if (AUD.calm() || !prefs.voice) { if (!AUD.calm() && prefs.office) AUD.murmur(0.5 + (p.vi % 5) / 10, estMs(text) / 1000); return sleep(estMs(text)); }
   if (S.hurry && !always) return sleep(estMs(text));
   const bab = babbles(); if (bab && AUD.ctx) { try { await speakBabble(text, p, primary ? 1 : 0.5, token); return; } catch {} }
   if (!bab && TTS.server && AUD.ctx) { try { await speakServer(text, p, primary ? 1 : 0.5, token, lo); return; } catch {} }
@@ -1322,7 +1369,7 @@ async function speakLine(text, p, primary, token, lo = voiceLang(text), always =
 //  rendering
 // =====================================================================
 function addTile(p) {
-  const d = document.createElement('div'); d.className = 'tile' + (p.lead ? ' lead' : ''); d.id = 't-' + p.id; d.tabIndex = 0; d.setAttribute('role', 'button'); d.setAttribute('aria-label', p.name + ' — ' + p.role); d.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(p.id); } }; d.style.display = 'none'; d.onclick = () => openDetail(p.id);
+  const d = document.createElement('div'); d.className = 'tile' + (p.lead ? ' lead' : ''); d.id = 't-' + p.id; d.tabIndex = 0; d.setAttribute('role', 'button'); d.setAttribute('aria-label', p.name + ' — ' + p.role); d.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(p.id); } }; d.style.display = 'none'; d.onclick = (e) => { const st = e.target.closest('.bubble, .status, .prop') && !String(getSelection() || '') && agentState(p.id, Date.now()); if (st && st.k === 'blocked' && st.sure) answerAt(S.cur); else openDetail(p.id); };   /* its "needs you" badge, its raised hand or its bubble while it asks you: the tab or terminal where the question or permission waits (answerAt), as the card does */
   d.innerHTML = `${avatarSVG(p, undefined, 't' + p.gid + '_')}<div class="bubble"></div><div class="status"></div><div class="prop"></div><div class="thought"></div><div class="ticker"></div><div class="tbadge"></div><div class="tag"><b>${esc(p.name)}</b><span>${esc(p.role)}</span><span class="tk"></span><span class="cx"></span></div>`;
   $('#stage').appendChild(d);
 }
@@ -1407,6 +1454,7 @@ function syncUI() {
   $('#bPlay').textContent = S.playing ? '⏸' : '▶';
   paintPill(); paintTabs();
   document.body.classList.toggle('replay', !S.live);
+  sayCheck();
 }
 
 // ---------- tool ticker, shared screen, flying messages ----------
@@ -1582,10 +1630,11 @@ function paintStates() {
     if (p.id === 'user') continue; const t = $('#t-' + p.id); if (!t) continue;
     const st = agentState(p.id, now), shown = t.style.display !== 'none'; if (shown && n[st.k] !== undefined && !S.gone.has(p.id)) { n[st.k]++; if (st.k === 'blocked' || st.k === 'stalled') attn.push(p.id); }
     STATE_CLASSES.forEach((c) => t.classList.toggle(c, st.k === c && !(c === 'done' && st.stop)));   /* stopped by the usage limit or a logout: resting, not the happy face and sparkles of done */
-    const el = t.querySelector('.status'); if (el.textContent !== st.txt) { el.textContent = st.txt; const tb = t.querySelector('.tbadge'); if (tb) tb.style.top = el.offsetHeight > 26 ? el.offsetTop + el.offsetHeight + 4 + 'px' : ''; } /* a status on two lines: the badges under it move down */ const sc = 'status ' + st.k + (isTurn(p.id, st) ? ' turn' : '') + (st.gave || st.stop ? ' gave' : ''); if (el.className !== sc) el.className = sc;
+    const el = t.querySelector('.status'); if (el.textContent !== st.txt) { el.textContent = st.txt; const tb = t.querySelector('.tbadge'); if (tb) tb.style.top = el.offsetHeight > 26 ? el.offsetTop + el.offsetHeight + 4 + 'px' : ''; } /* a status on two lines: the badges under it move down */ const go = st.k === 'blocked' && st.sure ? L('Cliquez pour aller répondre', 'Click to go and answer') : ''; if (el.title !== go) el.title = go; const sc = 'status ' + st.k + (isTurn(p.id, st) ? ' turn' : '') + (st.gave || st.stop ? ' gave' : ''); if (el.className !== sc) el.className = sc;
     const pr = t.querySelector('.prop'), want = { blocked: '✋', stalled: '😰', waiting: '⌛' }[st.k] || '', was = S.prevState[p.id];   // a raised hand, a sweat drop, an hourglass: the call metaphor for "needs you / stuck / waiting"
+    if (was === 'working' && st.k !== 'working' && shown && !p.custom && !S.hold) oneShot(t, 'lidshut', 420); else if (st.k === 'working') t.classList.remove('lidshut');   /* the drawn cast closes its laptop rather than see it vanish */
     const spot = S.spotted || (S.spotted = new Set()); if (st.k !== 'blocked' || !st.sure) spot.delete(p.id); else if (!spot.has(p.id) && shown && !S.gone.has(p.id) && !S.speakers.size && !(S.focusLock > Date.now())) { spot.add(p.id); setFocus(p.id); }   // one that waits on you takes the spotlight once per wait, as soon as nobody talks (the speaker has it until then)
-    if (st.k === 'done' && was && was !== 'done' && was !== 'idle') { pr.textContent = '🎉'; pr.className = 'prop cheer'; setTimeout(() => { if (pr.classList.contains('cheer')) { pr.textContent = ''; pr.className = 'prop'; } }, 1200); }
+    if (st.k === 'done' && was && was !== 'done' && was !== 'idle') { pr.textContent = '🎉'; pr.className = 'prop cheer'; if (shown) oneShot(t, 'yay', 950); setTimeout(() => { if (pr.classList.contains('cheer')) { pr.textContent = ''; pr.className = 'prop'; } }, 1200); }
     else if (!pr.classList.contains('cheer')) { if (pr.textContent !== want) pr.textContent = want; const pc = 'prop ' + (want ? st.k : ''); if (pr.className !== pc) pr.className = pc; }
     if (shown && !S.gone.has(p.id)) ros.push({ p, st });
     if (p.id === 'main' && st.k === 'done' && was && was !== 'done' && was !== 'idle' && S.live && S.playing) { S.wrap = was; if (Date.now() - (S.mainBusyAt || 0) > 45000) confetti(); if (S.mainBusyAt) coffeeAsk(S.mainBusyAt); }   // the lead is done, its face says so: it always has a word for it (see wrapUp, which needs to know what it was doing just before), and confetti after a long turn
@@ -1605,6 +1654,35 @@ function fitBoard(force) {   // the chips lose their words when they do not all 
 addEventListener('resize', () => fitBoard(true)); new ResizeObserver(() => requestAnimationFrame(() => fitBoard(true))).observe($('#board'));   /* the room the chips have also changes when the texts beside them do (a title, a longer status) */
 const RORDER = { blocked: 0, stalled: 1, working: 2, waiting: 3, idle: 4, done: 5 };
 const TOOL = { _codex: 'Codex', _vibe: 'Vibe', _omp: 'omp', _cowork: 'Cowork' }, leadTool = (p) => (p.id === 'main' && S.cur && TOOL[S.cur.proj] ? ' · ' + TOOL[S.cur.proj] : '');   // a session that is not a Claude Code one says which tool runs it: on its tab, and next to its lead, who has the same name in every call
+// ---------- the human's line: typed into the session's terminal through tmux (server: reply.js, off unless AGENT_STANDUP_REPLY=on) ----------
+const SAY = { name: '', why: '', draft: '' };   // draft: the id of the session the text in the field was started for
+let sayReq = 0;   // the latest sayCheck request: an older answer arriving late is ignored
+const sayWhy = (w) => ({ none: L('Session fermée : rien ne peut recevoir le message', 'Session closed: nothing can receive the message'), notmux: L('Session lancée hors tmux : lancez-la dans tmux pour lui parler', 'Session started outside tmux: start it in tmux to talk to it'), tmux: L('tmux injoignable', 'tmux unreachable'), text: L('Message vide ou trop long (4000 caractères au plus)', 'Empty or too long message (4000 characters at most)'), token: L('Page périmée : rechargez-la', 'Stale page: reload it'), waiting: L('Claude attend votre réponse dans le terminal (un menu est ouvert) : répondez-y là-bas', 'Claude is waiting for your answer in the terminal (a menu is open): answer it there'), busy: L('Claude travaille : vous pourrez écrire quand il aura fini', 'Claude is working: you can write when it is done'), changed: L('La session a changé pendant l\'envoi : le texte est resté dans le terminal, sans Entrée', 'The session changed while sending: the text stayed in the terminal, without Enter'), peer: L('Refusé : seul l\'utilisateur qui a lancé Agent Standup peut écrire', 'Refused: only the user who started Agent Standup can write'), platform: L('Pour l\'instant, l\'envoi ne marche que sous Linux', 'Sending works only on Linux for now') }[w] || L('Envoi impossible', 'Could not send'));
+let sayTick = 0;
+const sayStatus = (msg, err) => { const s = $('#sayS'), n = ++sayTick; s.textContent = ''; s.classList.toggle('err', !!err); if (msg) requestAnimationFrame(() => { if (n === sayTick) s.textContent = msg; }); };   // clear then set on the next frame: a repeated identical message is announced again
+const sayGrow = () => { const f = $('#sayT'); f.style.height = 'auto'; f.style.height = Math.min(f.scrollHeight + 2, 96) + 'px'; };
+async function sayCheck() {   // can the followed session hear us: asked when the session changes and every 5 s while live
+  const on = !!window.REPLY_TOKEN && S.live && !S.demo && !!S.cur && !TOOL[S.cur.proj]; document.body.classList.toggle('can-say', on); if (!on) return;
+  const id = S.cur.id, n = ++sayReq; if (SAY.id !== id) { SAY.id = id; SAY.name = ''; SAY.why = ''; $('#sayL').textContent = ''; $('#sayT').disabled = true; $('#sayB').disabled = true; sayStatus('', false); }   // another session: never show the old recipient
+  let r = { ok: false, why: 'tmux' }; try { r = await (await fetch('/api/reply?id=' + encodeURIComponent(id))).json(); } catch {}
+  if (n !== sayReq || !S.cur || S.cur.id !== id) return;
+  SAY.name = r.name || L('la session', 'the session'); $('#sayL').textContent = L('À ', 'To ') + SAY.name; $('#sayB').textContent = L('Envoyer', 'Send');
+  const why = !r.ok ? r.why || r.error : r.status === 'idle' ? '' : r.status === 'waiting' ? 'waiting' : 'busy', can = !why; $('#sayT').disabled = !can; if (!$('#sayB').classList.contains('busy')) $('#sayB').disabled = !can;   // only at the prompt: a permission menu (waiting) or one opening during a turn (busy) would take the line as its answer
+  if (why) { if (SAY.why !== why) sayStatus(sayWhy(why), false); } else if (SAY.why) sayStatus('', false); SAY.why = why;
+}
+setInterval(sayCheck, 5000);
+$('#say').onsubmit = async (ev) => {
+  ev.preventDefault(); const f = $('#sayT'), b = $('#sayB'), text = f.value.trim(); if (!text || b.disabled || !S.cur) return;
+  if (SAY.draft && SAY.draft !== S.cur.id) { SAY.draft = S.cur.id; sayStatus(L('Destinataire changé : ', 'Recipient changed: ') + (SAY.name || L('la session', 'the session')) + L('. Appuyez encore sur Entrée pour le lui envoyer.', '. Press Enter again to send it there.'), true); return; }   // the draft was started for another session: asked once before it goes to this one
+  const id = S.cur.id, name = SAY.name; b.disabled = true; b.classList.add('busy'); let r;
+  try { r = await (await fetch('/api/reply', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id, text, token: window.REPLY_TOKEN }) })).json(); } catch { r = { error: 'net' }; }
+  b.classList.remove('busy'); if (!S.cur || S.cur.id !== id) { if (r && (r.ok || r.error === 'changed') && f.value.trim() === text) { f.value = ''; SAY.draft = ''; sayGrow(); } sayCheck(); return; }   // the call moved to another session meanwhile: sayCheck owns its state (button, status), the draft stays
+  b.disabled = false;
+  if (r && r.ok) { if (f.value.trim() === text) { f.value = ''; SAY.draft = ''; sayGrow(); } sayStatus(L('Envoyé à ', 'Sent to ') + name, false); } else { if (r && r.error === 'changed' && f.value.trim() === text) { f.value = ''; SAY.draft = ''; sayGrow(); } sayStatus(sayWhy(r && r.error), true); }   // the typed text stays when it failed, except after changed: it is in the terminal prompt now, a second Send would type it again
+  f.focus(); sayCheck();
+};
+$('#sayT').onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); $('#say').requestSubmit(); } };   // Shift+Enter: a new line, flattened by the server
+$('#sayT').oninput = () => { sayGrow(); SAY.draft = $('#sayT').value ? SAY.draft || (S.cur && S.cur.id) || '' : ''; };
 const modelShort = (m) => { const v = String(m || ''); if (!v || v[0] === '<') return ''; const c = /(opus|sonnet|haiku|fable)[-_ ]?(\d{1,2})(?:[-.](\d{1,2})(?!\d))?(?!\d)/i.exec(v); const o = /claude-(\d)(?:-(\d))?-(opus|sonnet|haiku)/i.exec(v), cap = (w) => w[0].toUpperCase() + w.slice(1).toLowerCase(); if (o) return cap(o[3]) + ' ' + o[1] + (o[2] ? '.' + o[2] : ''); const g = /^gpt-(\d+(?:\.\d+)?[a-z]?)(?:-(.+))?$/i.exec(v.replace(/^.*\//, '').replace(/-\d{4}-?\d{2}-?\d{2}$/, '')); if (g) return ('GPT-' + g[1].toLowerCase() + (g[2] ? ' ' + g[2].split('-').map((w) => (/^(mini|nano)$/i.test(w) ? w.toLowerCase() : cap(w))).join(' ') : '')).slice(0, 24);   /* Codex: gpt-6-pro → GPT-6 Pro, gpt-5.1-codex-max → GPT-5.1 Codex Max, gpt-5-mini → GPT-5 mini */ return c ? cap(c[1]) + ' ' + c[2] + (c[3] ? '.' + c[3] : '') : v.replace(/^.*\//, '').replace(/-\d{8}$/, '').slice(0, 24); };   /* older ids put the version first: claude-3-5-sonnet → Sonnet 3.5 */   // claude-haiku-4-5-20251001 → Haiku 4.5
 const mixedModels = () => new Set(Object.keys(S.usage).filter((id) => S.agents[id] && S.model[id] && tokTotal(S.usage[id])).map((id) => modelShort(S.model[id])).filter(Boolean)).size > 1;   // only then is the model worth a place next to the count
 const effortWord = (e) => ({ low: L('faible', 'low'), medium: L('moyen', 'medium'), high: L('élevé', 'high'), xhigh: L('très élevé', 'extra high'), max: L('maximal', 'max') }[e] || e);   // the effort Claude Code says it worked at (written since 2.1.275; nothing from older versions)
@@ -1620,10 +1698,10 @@ function paintRoster(ros) {   // a fixed list beside the call: who is doing what
   const rows = ros.slice(0, 60).map(({ p, st }) => `<div class="rr k-${st.k}${isTurn(p.id, st) ? ' turn' : ''}${st.gave || st.stop ? ' gave' : ''}${S.focus === p.id ? ' sel' : ''}${S.speakers.has(p.id) ? ' speaking' : ''}" data-id="${esc(p.id)}" tabindex="0" role="button" aria-label="${esc(p.name)}, ${esc(st.txt || '')}" title="${esc(p.name + ' — ' + p.role + leadTool(p) + (st.txt ? '\n' + st.txt : '') + (S.lastTool[p.id] ? '\n' + S.lastTool[p.id] : ''))}"><div class="n"><span class="dot" style="background:${p.shirt}"></span><b>${esc(p.name)}</b><span class="ro">${esc(p.role + leadTool(p))}</span>${rosTok(p.id)}</div><div class="st">${esc(st.txt || L('en veille', 'standing by'))}${S.loops[p.id] ? ' 🔁' : ''}${S.wst.items && S.wst.items[p.id] && S.wst.items[p.id].length ? ' ♻' + S.wst.items[p.id].length : ''}</div></div>`).join('');
   const left = Object.values(S.agents).filter((p) => S.gone.has(p.id) && p.id !== 'main' && p.id !== 'user').sort((a, b) => (S.lastAct[b.id] || 0) - (S.lastAct[a.id] || 0));   // a finished agent's tile leaves the stage: its line stays here, with what it used
   const gone = left.slice(0, 40).map((p) => `<div class="rr left" data-id="${esc(p.id)}" tabindex="0" role="button" aria-label="${esc(p.name)}"><div class="n"><span class="dot" style="background:${p.shirt}"></span><b>${esc(p.name)}</b><span class="ro">${esc(p.role)}</span>${rosTok(p.id)}</div></div>`).join('');
-  const html = `<h3>${L('Agents', 'Agents')} · ${ros.length}</h3>${rows}${ros.length > 60 ? `<div class="ro" style="padding:4px 8px">+${ros.length - 60}</div>` : ''}${left.length ? `<h3 style="margin-top:8px">${L('terminés', 'done')} · ${left.length}</h3>${gone}` : ''}`;
+  const html = `<h3>${L('Agents', 'Agents')} · ${ros.length}<button class="rnm" type="button" title="${esc(L('Renommer les agents', 'Rename the agents'))}" aria-label="${esc(L('Renommer les agents', 'Rename the agents'))}">✎</button></h3>${rows}${ros.length > 60 ? `<div class="ro" style="padding:4px 8px">+${ros.length - 60}</div>` : ''}${left.length ? `<h3 style="margin-top:8px">${L('terminés', 'done')} · ${left.length}</h3>${gone}` : ''}`;
   if (box.dataset.h !== html) { box.dataset.h = html; box.innerHTML = html; }
 }
-$('#roster').onclick = (e) => { const r = e.target.closest('.rr'); if (!r) return; if (r.classList.contains('left')) { openDetail(r.dataset.id); return; } S.focusLock = Date.now() + 25000; setFocus(r.dataset.id); paintStates(); };
+$('#roster').onclick = (e) => { if (e.target.closest('.rnm')) return openPrefs($('#subNamesBox')); const r = e.target.closest('.rr'); if (!r) return; if (r.classList.contains('left')) { openDetail(r.dataset.id); return; } S.focusLock = Date.now() + 25000; setFocus(r.dataset.id); paintStates(); };
 $('#roster').onkeydown = (e) => { const r = e.target.closest('.rr'); if (r && r.classList.contains('left') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openDetail(r.dataset.id); } else if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); S.focusLock = Date.now() + 25000; setFocus(r.dataset.id); paintStates(); } else if (r && e.key === 'i') openDetail(r.dataset.id); };
 $('#roster').ondblclick = (e) => { const r = e.target.closest('.rr'); if (r) openDetail(r.dataset.id); };
 function renderBadges() {   // per tile: failed tool calls, a command that has been running a long time, an agent that went quiet
@@ -1660,7 +1738,7 @@ function setFav(color) {
   const c = document.createElement('canvas'); c.width = c.height = 32; const g = c.getContext('2d'); try { g.drawImage(FAVI, 0, 0, 32, 32); } catch {} g.fillStyle = color; g.beginPath(); g.arc(24, 8, 8, 0, 7); g.fill(); g.strokeStyle = '#12131a'; g.lineWidth = 2; g.stroke(); l.href = c.toDataURL();
 }
 function updateTitle() {
-  paintStates(); if (S.live && S.nBlocked && !S.wasBlocked && prefs.notify) { AUD.alert(); const msg = L('Un agent attend peut-être votre feu vert ✋', 'An agent may be waiting for you ✋'); if (EMBED) window.parent.postMessage({ agentStandup: 'notify', text: msg }, '*'); else { try { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') new Notification('Agent Standup', { body: msg }); } catch {} } } S.wasBlocked = S.nBlocked > 0;
+  paintStates(); if (S.live && S.nBlocked && !S.wasBlocked && prefs.notify) { AUD.need(); const msg = L('Un agent attend peut-être votre feu vert ✋', 'An agent may be waiting for you ✋'); if (EMBED) window.parent.postMessage({ agentStandup: 'notify', text: msg }, '*'); else { try { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') new Notification('Agent Standup', { body: msg }); } catch {} } } S.wasBlocked = S.nBlocked > 0;
   let n = 0; for (const id in S.status) if (S.status[id] === 'working' && !S.gone.has(id)) n++;
   if (S.live && S.agents.main && /^(working|waiting)$/.test(agentState('main', Date.now()).k)) n++;   // the lead counts too: a session without sub-agents also ends
   const need = S.live ? Math.max(S.nBlocked || 0, attnItems(Date.now()).filter((x) => x.sure).length) : 0;   // the tab counts every session that needs you, not only this one's agents (a menu really open, as the red icon always did)
@@ -1733,7 +1811,7 @@ function setTicker(id, e) {   // the strip on the tile: spinner while running, t
   tk.classList.add('on'); if (running) { tk.classList.remove('flash'); void tk.offsetWidth; tk.classList.add('flash'); }
 }
 function tickTools(ev) {
-  ev._n = ev.tools.length; const t = $('#t-' + ev.agent); if (!t) return; t.style.display = '';
+  ev._n = ev.tools.length; const t = $('#t-' + ev.agent); if (!t) return; if (t.style.display === 'none') flip(() => (t.style.display = ''));
   ev.tools.forEach((tool) => pushTerm(ev.agent, tool));
   const buf = S.term[ev.agent], k = ev.tools[ev.tools.length - 1];
   S.tc[ev.agent] = (S.tc[ev.agent] || 0) + ev.tools.length; S.lastTool[ev.agent] = k.name + ' ' + (k.arg || '').slice(-38);
@@ -2081,8 +2159,21 @@ addEventListener('click', (e) => { if ($('#fpop') && !e.target.closest('#fpop, #
 addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#fpop')) { filesPop(false); const b = $('#fAll'); if (b) b.focus(); } });
 // the speaker always gets the spotlight (and keeps it until someone else talks)
 function setFocus(id) {
-  if (S.focus === id) return; const o = $('#t-' + S.focus); if (o) o.classList.remove('focus'); S.focus = id; const t = $('#t-' + id);
-  if (t) { t.classList.add('focus'); $('#stage').scrollTo({ top: 0, behavior: 'smooth' }); }
+  if (S.focus === id) return; flip(() => { const o = $('#t-' + S.focus); if (o) o.classList.remove('focus'); S.focus = id; const t = $('#t-' + id); if (t) t.classList.add('focus'); });
+  if ($('#t-' + id)) $('#stage').scrollTo({ top: 0, behavior: 'smooth' });
+}
+// the tiles slide to their new places instead of jumping there: a spotlight that moves, a tile that comes or goes. Not in a frozen moment (screenshots), while a replay is recomputed, in the compact rows, nor with reduced motion
+function flip(fn) {
+  const b = document.body; if (S.hold || S.recomputing || document.hidden || reduced() || !Element.prototype.animate || b.classList.contains('compact') || b.classList.contains('tree') || b.classList.contains('board')) return fn();
+  const was = new Map(); for (const t of $('#stage').children) if (t.classList.contains('tile') && t.style.display !== 'none') was.set(t, t.getBoundingClientRect());   /* where they are seen now, halfway through a slide included */
+  for (const t of was.keys()) if (t._flip) { t._flip.cancel(); t._flip = null; }
+  fn();
+  for (const [t, a] of was) {
+    if (t.style.display === 'none' || !a.width) continue; const r = t.getBoundingClientRect(); if (!r.width) continue;
+    const dx = a.left + a.width / 2 - (r.left + r.width / 2), dy = a.top + a.height / 2 - (r.top + r.height / 2), sx = a.width / r.width, sy = a.height / r.height;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(sx - 1) < .02 && Math.abs(sy - 1) < .02) continue;
+    try { const an = t.animate([{ transform: `translate(${dx}px,${dy}px) scale(${sx},${sy})` }, { transform: 'none' }], { duration: 340, easing: 'cubic-bezier(.25,.8,.3,1)', composite: 'add' }); t._flip = an; an.onfinish = () => { if (t._flip === an) t._flip = null; }; } catch {}   /* add: on top of a pop or a join the tile may be doing */
+  }
 }
 function fly(fromId, toId, emoji) {
   const a = $('#t-' + fromId), b = $('#t-' + toId); if (!a || !b || document.body.classList.contains('tree')) return;
@@ -2117,7 +2208,7 @@ function vanish(id) {
   toast(`${p.name} ${L('a quitté l’appel', 'left the call')} 👋`);
   if (t.style.display === 'none' || document.body.classList.contains('tree')) return;
   S.leaving.add(id); const say = prefs.banter && !S.hurry && !S.speakers.has(id), go = () => { t.classList.remove('bye'); if (!S.leaving.has(id)) return; t.classList.add('vanishing'); poof(t, p.shirt); AUD.tone(660, .35, 'sine', .07); AUD.tone(330, .5, 'sine', .06, .12);
-    setTimeout(() => { S.leaving.delete(id); t.classList.remove('vanishing'); if (S.gone.has(id)) t.style.display = 'none'; }, 1250); };
+    setTimeout(() => { S.leaving.delete(id); t.classList.remove('vanishing'); if (S.gone.has(id)) flip(() => (t.style.display = 'none')); }, 1250); };
   if (say) { const b = t.querySelector('.bubble'), line = byeLine(id); b.innerHTML = `<small>👋</small>${esc(line)}`; t.classList.add('bye'); t._byeT = setTimeout(go, 1500); } else go();   // a short goodbye before the poof
 }
 setInterval(() => {
@@ -2132,16 +2223,20 @@ function startTalk(id, text, label) {
   const t = $('#t-' + id); if (!t) return; endThought(id); stopMumble(); TH.next[id] = Math.max(TH.next[id] || 0, Date.now() + 8000);   // a spoken line takes the bubble and the floor
   if (S.present && S.present !== id) hidePresent();
   S.spokeAt = performance.now(); S.fill = 0; S.mused = false;
-  if (!S.speakers.size && !(S.focusLock > Date.now())) setFocus(id); S.gone.delete(id); if (S.doneAt[id] != null) S.doneAt[id] = S.clock; t.style.display = ''; t.classList.add('speaking'); S.speakers.add(id); S.say[id] = { text, label }; AUD.duck(true);
+  if (!S.speakers.size && !(S.focusLock > Date.now())) setFocus(id); S.gone.delete(id); if (S.doneAt[id] != null) S.doneAt[id] = S.clock; if (t.style.display === 'none') flip(() => (t.style.display = '')); const fresh = !t.classList.contains('speaking'); t.classList.add('speaking'); if (fresh && !S.hold) { oneShot(t, 'inhale', 360); listen(id, text); } S.speakers.add(id); S.say[id] = { text, label }; AUD.duck(true);
   const shown0 = pieces(text), first = shown0.length > 1 ? shown0[0] : text; const b = t.querySelector('.bubble'); b.innerHTML = (label ? `<small>${esc(label)}</small>` : '') + esc(first);
   if (S.present === id) { $('#pcap').textContent = first; $('#pcam').classList.add('speaking'); }
-  const m = t.querySelector('.mouthE'); let open = false; clearInterval(mouths.get(id));
-  mouths.set(id, setInterval(() => {
-    if (!m) { const ct = t.querySelector('.cimg-talk'); if (ct) { const lv0 = S.level[id], op = lv0 ? lv0() > 0.05 : (open = !open); ct.style.display = op ? '' : 'none'; t.querySelector('.cimg').style.display = op ? 'none' : ''; if (S.present === id) { const pc = $('#pcam .cimg-talk'), pi = $('#pcam .cimg'); if (pc && pi) { pc.style.display = op ? '' : 'none'; pi.style.display = op ? 'none' : ''; } } } return; }   // custom character: swap between its two frames
-    const pm = S.present === id ? $('#pcam .mouthE') : null, lv = S.level[id]; if (lv) { const v = lv(); const ry = (.9 + Math.min(4.2, v * 28)).toFixed(1), rx = (4.8 - Math.min(1.1, v * 6)).toFixed(1); m.setAttribute('ry', ry); m.setAttribute('rx', rx); if (pm) { pm.setAttribute('ry', ry); pm.setAttribute('rx', rx); } }
-    else { open = !open; m.setAttribute('ry', open ? 4.2 : 1.1); m.setAttribute('rx', open ? 4 : 4.7); if (pm) { pm.setAttribute('ry', open ? 4.2 : 1.1); pm.setAttribute('rx', open ? 4 : 4.7); } }
-  }, 70));
+  const m = t.querySelector('.mouthE'); let open = false, lvS = 0, oS = 0, syl = 0, sylN = 0, sylA = 1, n = 0; clearInterval(mouths.get(id));
+  mouths.set(id, setInterval(() => {   // 25 times a second, the clock of the other moves (IDLE_ANIMS)
+    n++; if (!m) { const ct = t.querySelector('.cimg-talk'); if (ct) { const lv0 = S.level[id], op = lv0 ? lv0() > 0.05 : n % 2 ? open : (open = !open); ct.style.display = op ? '' : 'none'; t.querySelector('.cimg').style.display = op ? 'none' : ''; if (S.present === id) { const pc = $('#pcam .cimg-talk'), pi = $('#pcam .cimg'); if (pc && pi) { pc.style.display = op ? '' : 'none'; pi.style.display = op ? 'none' : ''; } } } return; }   // custom character: swap between its two frames
+    const pm = S.present === id ? $('#pcam .mouthE') : null, lv = S.level[id]; let o;
+    if (lv) { const v = lv(); lvS += (v - lvS) * (v > lvS ? .6 : .28); o = Math.min(1, lvS * 28 / 4.2); }   /* opens fast, closes a little slower: a mouth, not a level meter */
+    else { if (syl >= sylN) { syl = 0; sylN = 4 + Math.floor(Math.random() * 4); sylA = Math.random() < .12 ? 0 : .5 + Math.random() * .3; } o = sylA * Math.sin(Math.PI * syl++ / sylN); }   /* no sound to follow: syllables of 160 to 280 ms, now and then a short pause */
+    oS += (o - oS) * .55; o = oS;   /* eased toward where it goes: no jump from one frame to the next */
+    const ry = (.9 + 4.2 * o).toFixed(2), rx = (4.8 - .9 * o).toFixed(2); m.setAttribute('ry', ry); m.setAttribute('rx', rx); if (pm) { pm.setAttribute('ry', ry); pm.setAttribute('rx', rx); }
+  }, 40));
   if (document.body.classList.contains('tree')) renderTree();
+  gaze();
 }
 
 function thought(id, em) { const t = $('#t-' + id); if (!t || t.style.display === 'none') return; const el = t.querySelector('.thought'); el.textContent = em; el.classList.remove('go'); void el.offsetWidth; el.classList.add('go'); }
@@ -2159,11 +2254,35 @@ function stopTalk(id) {
   clearInterval(mouths.get(id)); mouths.delete(id); S.speakers.delete(id); if (!S.speakers.size) AUD.duck(false); if (S.focus === id && S.speakers.size) setFocus([...S.speakers][0]);
   if (S.present === id) { $('#pcap').textContent = ''; $('#pcam').classList.remove('speaking'); const pm = $('#pcam .mouthE'); if (pm) { pm.setAttribute('ry', .9); pm.setAttribute('rx', 4.6); } }
   const t = $('#t-' + id); if (!t) return;
-  t.classList.remove('speaking'); const m = t.querySelector('.mouthE'); if (m) { m.setAttribute('ry', .9); m.setAttribute('rx', 4.6); }
+  gaze(); t.classList.remove('speaking'); if (!S.recomputing && !S.hold) oneShot(t, 'settle', 400); const m = t.querySelector('.mouthE'); if (m) { m.setAttribute('ry', .9); m.setAttribute('rx', 4.6); }
   const ct = t.querySelector('.cimg-talk'); if (ct) { ct.style.display = 'none'; t.querySelector('.cimg').style.display = ''; }
   const pc = $('#pcam .cimg-talk'), pi = $('#pcam .cimg'); if (pc && pi && S.present === id) { pc.style.display = 'none'; pi.style.display = ''; }
 }
 const clearSpeaking = () => [...S.speakers].forEach(stopTalk);
+function gaze() {   // the others turn their eyes to the one speaking, and back to the camera when the floor is free; measured where the tiles go (their layout, not where a slide shows them), so the eyes turn while the tiles move
+  clearTimeout(gaze.t); gaze.t = setTimeout(() => {
+    const box = (t) => ({ left: t.offsetLeft, top: t.offsetTop, width: t.offsetWidth, height: t.offsetHeight }), sp = [...S.speakers][0], st = sp && $('#t-' + sp), r = st && box(st);
+    for (const t of document.querySelectorAll('#stage .tile')) { let x = 0, y = 0; if (r && r.width && t !== st) { const q = box(t), dx = r.left + r.width / 2 - (q.left + q.width / 2), dy = r.top + r.height / 2 - (q.top + q.height / 2), d = Math.hypot(dx, dy) || 1; x = dx / d; y = dy / d; } const lx = x.toFixed(2), ly = y.toFixed(2); if (t.style.getPropertyValue('--lx') !== lx) t.style.setProperty('--lx', lx); if (t.style.getPropertyValue('--ly') !== ly) t.style.setProperty('--ly', ly); }
+  }, 60);
+}
+function oneShot(t, c, ms) { t.classList.remove(c); void t.offsetWidth; t.classList.add(c); clearTimeout(t['_' + c]); t['_' + c] = setTimeout(() => t.classList.remove(c), ms); }   // a move of a character that plays once: its class, restarted, then taken off
+const LISTEN = { good: /(^|[^\p{L}\p{N}])(done|fixed|passe[sd]|passing|works|merged|shipped|terminée?s?|corrigée?s?|réglée?s?|réussie?s?|finie?s?)(?![\p{L}\p{N}])|✅|🎉/iu, bad: /(^|[^\p{L}\p{N}])(fail|fails|failed|failing|failure|errors?|broken|broke|crash|crashed|crashes|bugs?|échoue|échoué|échec|erreurs?|plante|cassée?)(?![\p{L}\p{N}])|❌/iu, at: {} };
+function listen(id, text) {   // the others react once to a line: the one it names nods, a failure raises their eyebrows, good news gets a nod; each kind at most every 8 s, so a debugging session does not keep everyone's eyebrows up
+  if (S.hold || S.recomputing || reduced() || !text) return; const s = String(text), now = Date.now(), cool = (k) => now - (LISTEN.at[k] || 0) > 8000;
+  const bad = cool('bad') && LISTEN.bad.test(s), good = !bad && cool('good') && LISTEN.good.test(s); if (bad) LISTEN.at.bad = now; if (good) LISTEN.at.good = now;
+  for (const p of Object.values(S.agents)) {
+    if (p.id === id) continue; const t = $('#t-' + p.id); if (!t || t.style.display === 'none' || t.classList.contains('vanishing')) continue;
+    const nm = p.id !== 'user' && p.name && p.name.length > 2 && new RegExp('(^|[^\\p{L}\\p{N}])' + p.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'iu').test(s), c = nm || good ? 'nod1' : bad ? 'wow' : '';
+    if (c) setTimeout(() => { if (!t.classList.contains('speaking')) oneShot(t, c, c === 'wow' ? 1150 : 800); }, 250 + Math.random() * 450);
+  }
+}
+setInterval(() => {   // now and then someone who only listens moves a little: a look away, a stretch. One at a time, never while it works or speaks
+  if (!S.playing || document.hidden || S.hold || reduced() || Math.random() < .5) return;
+  const idle = [...document.querySelectorAll('#stage .tile')].filter((t) => t.style.display !== 'none' && !t.matches('.speaking, .working, .vanishing, .bye, .yay, .nod1, .wow, .stretch')); if (!idle.length) return;
+  const t = idle[Math.floor(Math.random() * idle.length)];
+  if (!S.speakers.size && !t.classList.contains('done') && Math.random() < .6) { const a = Math.random() * Math.PI * 2; t.style.setProperty('--lx', Math.cos(a).toFixed(2)); t.style.setProperty('--ly', (Math.sin(a) * .6).toFixed(2)); clearTimeout(t._glance); t._glance = setTimeout(gaze, 1500); }   /* gaze() brings the eyes back */
+  else oneShot(t, 'stretch', 1300);
+}, 9000);
 // =====================================================================
 //  inner thoughts: an agent that has been at work for a while thinks to itself, in a bubble it does not say. What it thinks is real: its own reasoning when the session kept it
 //  (rarely: Claude Code mostly stores a signature), otherwise what it is on right now (the command it waits for, the files it goes between, its to-do item, a failure, its task).
@@ -2220,7 +2339,7 @@ function endThought(id) {
 const clearThoughts = () => { document.querySelectorAll('.tile.musing').forEach((t) => endThought(t.id.slice(2))); stopMumble(); };
 function stopMumble() { const v = TH.voice; if (v) { TH.voice = null; try { v.src.stop(); } catch {} } }
 async function mumble(id, text) {   // lips closed: the mouth does not move, the music does not make room, and anyone who starts to speak cuts it
-  const p = S.agents[id], t = $('#t-' + id); if (!p || !t || !prefs.voice || AUD.off() || !AUD.ctx || S.speakers.size || TH.voice) return;
+  const p = S.agents[id], t = $('#t-' + id); if (!p || !t || !prefs.voice || AUD.calm() || !AUD.ctx || S.speakers.size || TH.voice) return;
   if (!TTS.server || babbles()) { const o = AUD.murmur(0.5 + (p.vi % 5) / 10, Math.min(2.2, estMs(text) / 1000), 0.4); if (o) { TH.voice = { id, src: o }; o.addEventListener('ended', () => { if (TH.voice && TH.voice.src === o) TH.voice = null; }); } return; }
   const voice = TTS.voiceFor(p, voiceLang(text)), token = S.token; if (!voice) return; let buf; try { buf = await TTS.buf(speakable(text), voice, TTS.rate(), true); } catch { return; }   // made like a line prepared ahead: it never delays a real one
   if (token !== S.token || S.speakers.size || TH.voice || !t.classList.contains('musing')) return;   // someone spoke meanwhile, or the thought is gone
@@ -2268,7 +2387,8 @@ $('#tree').onclick = (e) => {
 
 // ---------- agent detail ----------
 function openDetail(id) { const p = S.agents[id]; if (!p) return; S.detail = id; S.detailOpen = (S.detailOpen || 0) + 1;   // detailOpen: the human's made-up day is drawn again at each opening, and stays put while the panel refreshes
-  $('#dname').textContent = `${p.name} · ${p.role}`; renderDetail(); $('#detail').classList.add('on'); }
+  $('#dname').textContent = `${p.name} · ${p.role}`; $('#dren').style.display = id === 'user' ? 'none' : ''; renderDetail(); $('#detail').classList.add('on'); }
+$('#dren').onclick = () => { const p = S.agents[S.detail]; if (!p || p.id === 'user') return; openPrefs(p.id !== 'main' && !p.twinN ? $('#subNamesBox') : projectLeadKey() && !cleanLead(APP.lead) ? $('#projectLeadBox') : $('#leadBox')); };   // ✎ beside an agent's name: where its name is chosen (the lead and its forks: the lead's name, for this project when there is one)
 // ---------- the human's panel: nothing to do any more, and proud of it. Drawn at random each time it opens; English and French, the other languages get the English ----------
 const IDLE = {
   en: { tools: ['Coffee', 'Approve without reading', 'Refresh the pull request', '“Looks good to me”', 'Stretch', 'Check Slack', 'Rename one variable', 'Explain the plan to the cat', 'Open X “for research”', 'Sigh', 'Snack', 'Water the plant', 'Pretend to review', 'Update LinkedIn', 'Ctrl+C', 'Ctrl+V', 'Close 37 tabs'],
@@ -2887,7 +3007,8 @@ async function loadSession(proj, id) {
   pause(); const mine = (S.loadN = (S.loadN || 0) + 1);
   const data = await (await fetch(`/api/session?proj=${encodeURIComponent(proj)}&id=${id}`)).json();
   if (mine !== S.loadN || data.error) return false;
-  S.term = {}; S.camFor = null; S.focus = null; S.agents = {}; S.cost = data.cost || null; for (const k in nameBook) delete nameBook[k]; [{ id: 'user' }, ...data.agents].forEach((a) => (S.agents[a.id] = persona(twinOf(a))));
+  leadProject = data.project || null; clearTimeout(leadTimer); leadField(true);
+  S.term = {}; S.camFor = null; S.focus = null; S.agents = {}; S.cost = data.cost || null; for (const k in nameBook) delete nameBook[k]; const all = [{ id: 'user' }, ...data.agents]; S.soon = all; for (const a of byBorn(all)) S.agents[a.id] = persona(twinOf(a)); S.soon = null; S.agents = Object.fromEntries(all.map((a) => [a.id, S.agents[a.id]]));   // named in the order they started, kept in the server's order
   clearThoughts(); Object.assign(TH, { since: {}, next: {}, said: {}, last: 0 }); S.events = data.events; stampT(0); S.byK = new Map(data.events.map((e) => [e.k, e])); S.seq = data.seq || 0; S.ep = data.ep || ''; S.sawEnd = !!data.marks || data.events.some((e) => e.end); S.late = []; S.pos = 0; S.joinAt = Date.now(); S.idx = 0; S.status = {}; S.tc = {}; S.cur = { proj, id }; S.logTo = 0; S.detail = null; $('#detail').classList.remove('on'); S.fgone = new Set(); S.fmade = new Map(); S.artOk = new Map(); S.artPin = null; S.artWhole = null; S.wholeSeen = new Set();
   const opt = $('#sessions').selectedOptions[0]; S.title = (S.live ? niceProj(proj) : opt && opt.dataset.title) || '';
   if (proj === '_demo') S.events.forEach((e) => { if (e.fr) trMem.set(baseText(e), e.fr, 'fr'); });   // the demo ships its own French
@@ -2909,7 +3030,7 @@ async function followCurrent() {
   if (S.cur && S.cur.id === cur.id && S.cur.proj === cur.proj) return false;
   const key = cur.proj + '/' + cur.id, was = S.lastKey, moved = !!was && was !== key && !S.locked; if (moved) S.left[was] = Date.now();   // what was said of the session the call leaves is not said again when it comes back to it
   if (!(await loadSession(cur.proj, cur.id))) return false;
-  S.lastKey = key; if (moved) { const r = rowOf(cur); toast('↪ ' + (r ? tabName(r) : niceProj(cur.proj))); } paintTabs(); sessPoll();
+  S.lastKey = key; if (moved) { const r = rowOf(cur); toast('↪ ' + (r ? tabName(r) : niceProj(cur.proj))); } paintTabs(); sessPoll(); sayCheck();
   const start = liveStart(); if (!S.locked && !S.userPaused) run(start); return true;
 }
 // Live: a call starts when you join it. Only what happened since then, and was not said yet, is said (the last 16 events at most, when a session is picked up on the way);
@@ -2935,15 +3056,17 @@ function amend(e, was) {   // the server corrected an event the call already has
 let polling = false, polledAt = 0;
 setInterval(async () => {
   if (!S.live || polling) return;
-  if (document.hidden && AUD.off() && Date.now() - polledAt < 2500) return;   // hidden and not heard (muted, or another window has the sound): every 2.5 s is enough for the alerts; a call you listen to keeps its pace
+  if (document.hidden && AUD.calm() && Date.now() - polledAt < 2500) return;   // hidden and not heard (muted, zen, or another window has the sound): every 2.5 s is enough for the alerts; a call you listen to keeps its pace
   polling = true; polledAt = Date.now();
   try {
     const switched = await followCurrent(); if (S.offline) { S.offline = false; syncUI(); }
     if (switched || !S.cur) return;
     const cur = S.cur, d = await (await fetch(`/api/session?proj=${encodeURIComponent(cur.proj)}&id=${cur.id}&after=${S.seq}&ep=${encodeURIComponent(S.ep)}`)).json();
     if (d.error || cur !== S.cur) return; if (d.resync) { S.cur = null; return; }   // the server no longer has our place (restarted, transcript rewritten): reload next tick
+    if ('project' in d && (d.project || {}).key !== (leadProject || {}).key) { leadProject = d.project || null; clearTimeout(leadTimer); leadField(true); renameLead(); }   // the first cwd can arrive after the call opens, even without a new event
     S.seq = d.seq; if (d.marks) S.sawEnd = true; if (d.cost && (!S.cost || d.cost.usd !== S.cost.usd || d.cost.final !== S.cost.final)) { S.cost = d.cost; later('tok', renderTokens, 300); } if (!d.events || !d.events.length) return;
-    for (const a of d.agents) if (!S.agents[a.id]) { S.agents[a.id] = persona(twinOf(a)); addTile(S.agents[a.id]); }
+    for (const a of d.agents) if (a.born && S.agents[a.id] && !S.agents[a.id].born) S.agents[a.id].born = a.born;   /* seen before its first line was read: its start time now, for the next renaming */
+    S.soon = d.agents.filter((x) => !S.agents[x.id]); for (const a of byBorn(S.soon)) { S.agents[a.id] = persona(twinOf(a)); addTile(S.agents[a.id]); } S.soon = null;   // several new at once: named in the order they started, as a reload names them
     const from = S.events.length, fresh = [], changed = [];   // the session is not written in order: what is new goes at the end (the order the call got it in), what the server corrected is corrected in place
     for (const e of d.events) { const old = S.byK.get(e.k); if (old && old.tools && e.tools) e.tools = e.tools.map((t, j) => (old.tools[j] && old.tools[j].id === t.id ? Object.assign(old.tools[j], t) : t));   /* a call sent again (its plan named by the answer): the same object, which the shared screen holds */
       if (old) { changed.push([old, { kind: old.kind, n: old.tools ? old.tools.length : 0, end: old.end }]); Object.assign(old, e); } else { S.byK.set(e.k, e); fresh.push(e); } }
@@ -3129,7 +3252,7 @@ function showVisit(v) {   // the same face and name each time for a given sessio
 }
 function hideVisit() { clearTimeout(showVisit.t); S.visit = S.knock = null; const el = $('#visit'); if (el.className) { el.className = ''; el.innerHTML = ''; } }
 async function visitSay(v, token) {
-  if (S.visit !== v || AUD.off() || !prefs.voice) return; const el = $('#visit'); el.classList.add('speaking'); AUD.duck(true);
+  if (S.visit !== v || AUD.calm() || !prefs.voice) return; const el = $('#visit'); el.classList.add('speaking'); AUD.duck(true);
   await speakLine(v.line, v.p, true, token); el.classList.remove('speaking'); if (!S.speakers.size) AUD.duck(false);
 }
 $('#visit').onclick = (e) => { const v = S.visit; if (!v) return; if (e.target.closest('.vx')) hideVisit(); else { goSession(v.r.proj, v.r.id); answerAt(v.r); } };
@@ -3254,8 +3377,8 @@ function applyLang() {
   document.querySelectorAll('#viewSeg button').forEach((b) => { b.title = b.textContent; });   // in a narrow window they are icons: the name stays as a tooltip
   $('#callTrMi').style.display = CALL_LANG[prefs.lang] && !FR() ? '' : 'none';
   const sel = $('#langSel'); if (!sel.options.length) sel.innerHTML = LANGS.map(([c, n]) => `<option value="${c}">${n}</option>`).join(''); sel.value = prefs.lang;
-  [['#bPlay', L('Pause / Lecture (espace)', 'Pause / Play (space)')], ['#bLog', L('Transcription', 'Transcript')], ['#bMute', L('Son (touche M)', 'Sound (M key)')], ['#bMenu', L('Réglages', 'Settings')], ['#dclose', L('Fermer', 'Close')], ['#officeVol', L('Volume de l’ambiance', 'Ambience volume')], ['#voiceVol', L('Volume des voix', 'Voice volume')], ['#musicVol', L('Volume de la musique', 'Music volume')], ['#liveProj', L('Projet à suivre', 'Project to follow')], ['#reactBar', L('Réactions', 'Reactions')], ['#logQ', L('Rechercher dans la transcription', 'Search the transcript')], ['#roster', L('Agents', 'Agents')], ['#leadName', L('Nom de l’agent principal', 'Lead agent name')]].forEach(([q, t]) => { const el = $(q); if (!el) return; el.title = t; el.setAttribute('aria-label', t); }); $('#logQ').placeholder = L('Rechercher…', 'Search…'); $('#menuQ').placeholder = L('Chercher un réglage…', 'Search settings…'); $('#menuQ').setAttribute('aria-label', $('#menuQ').placeholder); $('#sps').setAttribute('aria-label', L('Vitesses prédéfinies', 'Speed presets')); document.querySelectorAll('#reactBar button').forEach((b) => b.setAttribute('aria-label', b.dataset.e));
-  leadField();
+  [['#bPlay', L('Pause / Lecture (espace)', 'Pause / Play (space)')], ['#bLog', L('Transcription', 'Transcript')], ['#bMute', L('Son (touche M)', 'Sound (M key)')], ['#bMenu', L('Réglages', 'Settings')], ['#dclose', L('Fermer', 'Close')], ['#officeVol', L('Volume de l’ambiance', 'Ambience volume')], ['#voiceVol', L('Volume des voix', 'Voice volume')], ['#musicVol', L('Volume de la musique', 'Music volume')], ['#liveProj', L('Projet à suivre', 'Project to follow')], ['#reactBar', L('Réactions', 'Reactions')], ['#logQ', L('Rechercher dans la transcription', 'Search the transcript')], ['#roster', L('Agents', 'Agents')], ['#leadName', L('Nom de l’agent principal', 'Lead agent name')], ['#dren', L('Renommer', 'Rename')]].forEach(([q, t]) => { const el = $(q); if (!el) return; el.title = t; el.setAttribute('aria-label', t); }); $('#logQ').placeholder = L('Rechercher…', 'Search…'); $('#menuQ').placeholder = L('Chercher un réglage…', 'Search settings…'); $('#menuQ').setAttribute('aria-label', $('#menuQ').placeholder); $('#sps').setAttribute('aria-label', L('Vitesses prédéfinies', 'Speed presets')); document.querySelectorAll('#reactBar button').forEach((b) => b.setAttribute('aria-label', b.dataset.e));
+  leadField(); subField();
   $('#gB').textContent = L('🔊 Activer le son', '🔊 Turn on sound'); $('#gB').title = L('Ou cliquez n’importe où dans l’appel', 'Or click anywhere in the call');
   $('#eDemo').textContent = L('▶ Voir la démo', '▶ Watch the demo'); $('#eT').textContent = L('En attente d’une session', 'Waiting for a session'); $('#eP').innerHTML = watched() ? esc(L('Aucune session pour l’instant. Lancez Claude Code, Codex, Mistral Vibe ou omp dans {0} : l’appel démarrera tout seul.', 'No session yet. Start Claude Code, Codex, Mistral Vibe or omp in {0}: the call will start by itself.')).replace('{0}', () => `<b>${esc(watched())}</b>`) : esc(L('Aucune session sur cet ordinateur pour l’instant. Lancez Claude Code, Codex, Mistral Vibe ou omp (ou une tâche Cowork) : l’appel démarrera tout seul.', 'No session on this computer yet. Start Claude Code, Codex, Mistral Vibe or omp (or a Cowork task): the call will start by itself.'));
   for (const id in S.agents) { const p = persona(S.agents[id]); Object.assign(S.agents[id], { name: p.name, role: p.role }); const t = $('#t-' + id); if (t) { t.querySelector('.tag span').textContent = p.role; t.querySelector('.tag b').textContent = p.name; if (id === 'main' || id === 'user') t.querySelector('.tag span').textContent = p.role; } }
@@ -3263,9 +3386,9 @@ function applyLang() {
 }
 const elsewhere = () => !!(S.owner && S.owner !== CID);
 function applyMute() {
-  const b = $('#bMute'); b.textContent = AUD.muted || S.hush ? '🔇' : elsewhere() ? '🔈' : '🔊';
-  b.title = S.hush ? L('Le son s’active à votre premier clic dans l’appel', 'Sound turns on with your first click in the call') : elsewhere() ? L('Le son est joué dans une autre fenêtre — cliquer pour le reprendre ici', 'Sound is playing in another window — click to take it over here') : L('Son (touche M)', 'Sound (M key)');
-  AUD.apply(); if (AUD.off()) { synth && synth.cancel(); AUD.stopAll(); }
+  const b = $('#bMute'); b.textContent = AUD.muted || S.hush ? '🔇' : elsewhere() ? '🔈' : prefs.zen ? '🔔' : '🔊';
+  b.title = S.hush ? L('Le son s’active à votre premier clic dans l’appel', 'Sound turns on with your first click in the call') : elsewhere() ? L('Le son est joué dans une autre fenêtre — cliquer pour le reprendre ici', 'Sound is playing in another window — click to take it over here') : prefs.zen ? L('Zen : seulement les alertes, sans les voix (touche M)', 'Zen: alerts only, no voices (M key)') : L('Son (touche M)', 'Sound (M key)');
+  AUD.apply(); if (AUD.calm()) { synth && synth.cancel(); AUD.stopAll(); }
 }
 async function audioSync(claim) {   // heartbeat + ownership: avoids two Agent Standup windows talking at the same time
   try {
@@ -3275,7 +3398,7 @@ async function audioSync(claim) {   // heartbeat + ownership: avoids two Agent S
 }
 const claimAudio = () => { S.owner = CID; applyMute(); audioSync(true); };
 setInterval(() => audioSync(false), 1500);
-function toggleMute() { if (S.hush) return joinSound(); if (elsewhere()) { AUD.muted = false; claimAudio(); return; } AUD.muted = !AUD.muted; applyMute(); }
+function toggleMute() { if (S.hush) return joinSound(); if (elsewhere()) { AUD.muted = false; claimAudio(); return; } if (AUD.muted) { AUD.muted = false; prefs.zen = false; } else if (prefs.zen) AUD.muted = true; else prefs.zen = true; savePrefs(); document.querySelectorAll('.mi[data-t="zen"] .sw').forEach((w) => w.classList.toggle('on', !!prefs.zen)); syncSwitches(); applyMute(); }   // 🔊 everything → 🔔 zen (only the alerts) → 🔇 nothing
 function setView(v) { prefs.view = v; savePrefs(); document.body.classList.toggle('tree', v === 'tree'); document.body.classList.toggle('board', v === 'board'); if (v === 'board') renderBoardView(); document.querySelectorAll('#viewSeg button').forEach((b) => b.classList.toggle('on', b.dataset.v === v)); renderTree(); }
 
 $('#viewSeg').onclick = (e) => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); };
@@ -3287,7 +3410,7 @@ setInterval(() => {
   const busy = ids.filter((id) => agentState(id, Date.now()).k === 'working'), from = busy.length ? busy : ids, id = from[Math.floor(Math.random() * from.length)], t = $('#t-' + id);
   LAP.id = id; t.classList.add('lap'); setTimeout(() => { t.classList.add('lapout'); setTimeout(() => { t.classList.remove('lap', 'lapout'); LAP.id = ''; }, 450); }, 7000 + Math.random() * 7000);
 }, 5000);
-async function reloadChars() { await loadChars(); for (const k in imgCache) delete imgCache[k]; for (const id in S.agents) S.agents[id].custom = null; for (const id in S.agents) S.agents[id].custom = customFor(id); buildStage(); paintStatus(); packNote(); await renderCharInfo(); }
+async function reloadChars() { await loadChars(); for (const k in imgCache) delete imgCache[k]; for (const id in S.agents) S.agents[id].custom = null; for (const id in S.agents) S.agents[id].custom = customFor(S.agents[id].twin ? 'main' : id); buildStage(); paintStatus(); packNote(); await renderCharInfo(); }
 $('#charPick').onclick = () => { $('#menu').classList.remove('on'); CHPICK.more = ''; openChars(); };
 const packShut = () => { prefs.packOpen = false; savePrefs(); packNote(); voiceOffer(); };
 $('#packNoteB').onclick = $('#packNoteI').onclick = () => { packShut(); CHPICK.more = 'halloween'; openChars(); };
@@ -3311,20 +3434,22 @@ function menuInit() {
     $('#menuNone').style.display = q && !far.length && !secs.some((sc) => sc.items.some((e) => !e.classList.contains('mhide'))) ? '' : 'none';
   };
 }
-const onSwitch = (e) => { const b = e.target.closest('.mi[data-t]'); if (!b) return; prefs[b.dataset.t] = !prefs[b.dataset.t]; savePrefs(); if (prefs[b.dataset.t] && ['voice', 'office', 'music', 'notify'].includes(b.dataset.t)) claimAudio(); b.querySelector('.sw').classList.toggle('on', prefs[b.dataset.t]); AUD.apply(); if (b.dataset.t === 'shareUsage') { prefs.usageAsked = true; savePrefs(); usageOpened(true); } if (b.dataset.t === 'office') $('#officeBox').style.display = prefs.office ? '' : 'none'; if (b.dataset.t === 'callTr') { prefs.callTrSeen = true; savePrefs(); setLang(prefs.lang); } if (b.dataset.t === 'voice') { voiceOffer(); $('#voiceVolBox').style.display = prefs.voice ? '' : 'none'; } if (b.dataset.t === 'customLaptop') { for (const k in imgCache) delete imgCache[k]; buildStage(); paintStatus(); } if (b.dataset.t === 'files') paintFiles(); if (b.dataset.t === 'artNet' && S.present) renderPresent(); if (b.dataset.t === 'ownNames') renameAll(); if (b.dataset.t === 'reactions') document.body.classList.toggle('react', prefs.reactions); if (b.dataset.t === 'focusLayout') { document.body.classList.toggle('focusl', !!prefs.focusLayout); layout(); } if (b.dataset.t === 'roster') { document.body.classList.toggle('rost', prefs.roster); paintStates(); } if (b.dataset.t === 'notify') { prefs.notifyChosen = true; savePrefs(); } if (b.dataset.t === 'notify' && prefs.notify) askNotify(); if (b.dataset.t === 'vanish' && !prefs.vanish) { S.gone.clear(); paintStatus(); }
+const onSwitch = (e) => { const b = e.target.closest('.mi[data-t]'); if (!b) return; prefs[b.dataset.t] = !prefs[b.dataset.t]; savePrefs(); if (prefs[b.dataset.t] && ['voice', 'office', 'music', 'notify'].includes(b.dataset.t)) claimAudio(); b.querySelector('.sw').classList.toggle('on', prefs[b.dataset.t]); AUD.apply(); if (b.dataset.t === 'shareUsage') { prefs.usageAsked = true; savePrefs(); usageOpened(true); } if (b.dataset.t === 'office') $('#officeBox').style.display = prefs.office ? '' : 'none'; if (b.dataset.t === 'callTr') { prefs.callTrSeen = true; savePrefs(); setLang(prefs.lang); } if (b.dataset.t === 'voice') { voiceOffer(); $('#voiceVolBox').style.display = prefs.voice ? '' : 'none'; } if (b.dataset.t === 'customLaptop') { for (const k in imgCache) delete imgCache[k]; buildStage(); paintStatus(); } if (b.dataset.t === 'files') paintFiles(); if (b.dataset.t === 'artNet' && S.present) renderPresent(); if (b.dataset.t === 'ownNames') { renameAll(); subField(); } if (b.dataset.t === 'reactions') document.body.classList.toggle('react', prefs.reactions); if (b.dataset.t === 'focusLayout') { document.body.classList.toggle('focusl', !!prefs.focusLayout); layout(); } if (b.dataset.t === 'roster') { document.body.classList.toggle('rost', prefs.roster); paintStates(); } if (b.dataset.t === 'notify') { prefs.notifyChosen = true; savePrefs(); } if (b.dataset.t === 'notify' && prefs.notify) askNotify(); if (b.dataset.t === 'vanish' && !prefs.vanish) { S.gone.clear(); paintStatus(); }
   if (b.dataset.t === 'askCard') paintAsk(Date.now());
+  if (b.dataset.t === 'zen') applyMute();
   if (b.dataset.t === 'updateNotice') { prefs.updateAsked = true; savePrefs(); $('#updTip').style.display = 'none'; if (prefs.updateNotice) { updStart.at = 0; setTimeout(updStart, 600); } }   /* an answer too; on: asked once the settings file says so (savePrefs waits 400 ms) */
   if (b.dataset.t === 'music') { $('#musicBox').style.display = prefs.music ? '' : 'none'; if (prefs.music) { AUD.init(); AUD.apply(); } } };
 $('#menu').onclick = onSwitch; $('#prefs').onclick = (e) => { if (e.target === $('#prefs')) return closePrefs(); onSwitch(e); setTimeout(syncSwitches); };
 function openPrefs(target) {   // ⚙ → All settings; target: one of its settings, found by the search of the menu, shown and lit up
-  $('#menu').classList.remove('on'); $('#prefs').classList.add('on'); syncSwitches(); document.querySelectorAll('#prefs .mi[data-t]').forEach((b) => b.querySelector('.sw').classList.toggle('on', !!prefs[b.dataset.t]));
-  if (target) { target.scrollIntoView({ block: 'center' }); target.classList.remove('flash'); void target.offsetWidth; target.classList.add('flash'); (target.matches('.mi') ? target : target.querySelector('select, input, button') || target).focus(); } else $('#prefsX').focus();
+  $('#menu').classList.remove('on'); $('#prefs').classList.add('on'); syncSwitches(); subField(); document.querySelectorAll('#prefs .mi[data-t]').forEach((b) => b.querySelector('.sw').classList.toggle('on', !!prefs[b.dataset.t]));
+  if (target) { target.scrollIntoView({ block: 'center' }); target.classList.remove('flash'); void target.offsetWidth; target.classList.add('flash'); (target.matches('.mi') ? target : target.querySelector('select, input, textarea, button') || target).focus(); } else $('#prefsX').focus();
 }
-const PANEL_KEYS = ['office', 'officeVol', 'music', 'station', 'musicVol', 'voiceVol', 'notify', 'customLaptop', 'ownNames', 'roster', 'reactions', 'banter', 'chat', 'vanish', 'epi', 'files', 'artNet', 'visits', 'askCard', 'followTab', 'leadName'];   // what the panel holds, and so what Reset puts back
+const PANEL_KEYS = ['office', 'officeVol', 'music', 'station', 'musicVol', 'voiceVol', 'notify', 'customLaptop', 'ownNames', 'roster', 'reactions', 'banter', 'chat', 'vanish', 'epi', 'files', 'artNet', 'visits', 'askCard', 'followTab', 'leadName', 'subNames'];   // what the panel holds, and so what Reset puts back
 $('#prefsReset').onclick = async () => {
   const b = $('#prefsReset'); if (!b.classList.contains('sure')) { b.classList.add('sure'); b.textContent = L('Cliquez encore pour tout remettre', 'Click again to reset them all'); setTimeout(() => { b.classList.remove('sure'); b.textContent = L('Réglages par défaut', 'Reset to defaults'); }, 4000); return; }   // two clicks: nothing is lost by a stray one
-  for (const k of PANEL_KEYS) { if (k in PREF_DEFAULTS) prefs[k] = PREF_DEFAULTS[k]; else delete prefs[k]; } delete prefs.notifyChosen;   // notifyChosen too: the default of notifications is decided at start-up from it
-  prefs._t = Date.now(); try { localStorage.setItem('cc.prefs', prefsOut()); } catch {} for (const k of [...PANEL_KEYS, 'notifyChosen']) prefsBase[k] = { reset: true }; try { await putPrefs(); } catch {}   /* marked as changed: reset too what another window changed after this one loaded */
+  const keys = [...PANEL_KEYS, ...(projectLeadKey() ? [projectLeadKey()] : [])];   // reset the displayed project override, leaving other projects alone
+  for (const k of keys) { if (k in PREF_DEFAULTS) prefs[k] = PREF_DEFAULTS[k]; else delete prefs[k]; } delete prefs.notifyChosen;   // notifyChosen too: the default of notifications is decided at start-up from it
+  prefs._t = Date.now(); try { localStorage.setItem('cc.prefs', prefsOut()); } catch {} for (const k of [...keys, 'notifyChosen']) prefsBase[k] = { reset: true }; try { await putPrefs(); } catch {}   /* marked as changed: reset too what another window changed after this one loaded */
   location.reload();   // every part of the page starts again from them
 };
 function menuTip() {   // once, to someone who used the app before: where the settings went. Gone with its button, or as soon as the menu is opened
@@ -3346,15 +3471,33 @@ $('#station').value = prefs.station; $('#musicVol').value = prefs.musicVol; $('#
 $('#station').onchange = (e) => { prefs.station = e.target.value; savePrefs(); AUD.init(); RADIO.sync(); };
 $('#chatSel').value = ['quiet', 'normal', 'lively'].includes(prefs.chat) ? prefs.chat : 'normal'; $('#chatSel').onchange = () => { prefs.chat = $('#chatSel').value; savePrefs(); };
 // ⚙ → All settings → Lead agent name (empty: Margot). The editor's agentStandup.leadName wins over it: the field then shows that name, greyed, and says where it is set
-function leadField() {
+function leadField(projectChanged = false) {
   const f = $('#leadName'), ed = cleanLead(APP.lead); f.disabled = !!ed; if (document.activeElement !== f || ed) f.value = ed || cleanLead(prefs.leadName);
+  const p = $('#projectLeadName'), key = projectLeadKey(); p.disabled = !!ed || !key; p.placeholder = cleanLead(prefs.leadName) || LEAD_NAME;
+  if (projectChanged || document.activeElement !== p || ed) p.value = ed || (key ? cleanLead(prefs[key]) : '');
+  const ph = $('#projectLeadHint'); ph.textContent = key ? leadProject.label + ' · ' + L('Vide : utiliser le nom par défaut.', 'Empty: use the default name.') : L('Ouvrez un projet pour choisir son nom.', 'Open a project to choose its name.');
   const h = $('#leadHint'); h.style.display = ed ? '' : 'none'; h.textContent = ed ? L('Choisi dans les réglages de l’éditeur (agentStandup.leadName)', 'Set in the editor’s settings (agentStandup.leadName)') : '';
 }
 function renameLead() { renameAll(true); }   // the lead and its forks take the new name at once, in the call, the list and the transcript, and a sub-agent that had that name gets another
 let leadTimer = null;
 $('#leadName').oninput = () => { prefs.leadName = cleanLead($('#leadName').value); if (!prefs.leadName) delete prefs.leadName; savePrefs(); clearTimeout(leadTimer); leadTimer = setTimeout(renameLead, 250); };
 $('#leadName').onchange = () => { clearTimeout(leadTimer); renameLead(); leadField(); };
+$('#projectLeadName').oninput = () => { const key = projectLeadKey(); if (!key || cleanLead(APP.lead)) return; const name = cleanLead($('#projectLeadName').value); if (name) prefs[key] = name; else delete prefs[key]; savePrefs(); clearTimeout(leadTimer); leadTimer = setTimeout(renameLead, 250); };
+$('#projectLeadName').onchange = () => { clearTimeout(leadTimer); renameLead(); leadField(); };
 leadField();
+// ⚙ → All settings → Sub-agent names: your own list, given in its order (empty: the built-in names). "Start from the names in the call" writes in the names the call gave, in the order the agents came:
+// changing one there renames that agent, since the list is given again in the same order. Agents you named yourself (Keep my agents' own names) and the lead's forks are not in it
+function listNamed() { return byBorn(Object.values(S.agents)).filter((p) => p.id !== 'main' && p.id !== 'user' && !p.twinN && !(p.own && prefs.ownNames && !isLeadName(p.own))).map((p) => p.name); }
+function subField() {
+  const f = $('#subNames'); if (document.activeElement !== f) f.value = typeof prefs.subNames === 'string' ? prefs.subNames : ''; f.placeholder = NAMES.slice(0, 5).join(', ') + ', …';
+  $('#subNamesHint').textContent = L('Renommez tous les sous-agents : des prénoms séparés par des virgules, donnés dans l’ordre où les agents arrivent. Vide : les prénoms intégrés.', 'Rename every sub-agent: names separated by commas, given in the order the agents start. Empty: the built-in names.') + ' ' + (prefs.ownNames ? L('Les agents que vous avez nommés vous-même gardent leur nom (réglage ci-dessous).', 'Agents you named yourself keep their names (switch below).') : L('Les agents que vous avez nommés vous-même prennent aussi ces prénoms (réglage ci-dessous).', 'Agents you named yourself take these names too (switch below).'));
+  $('#subFill').style.display = !subNameList().length && listNamed().length ? '' : 'none';
+}
+let subTimer = null; const renameSubs = () => renameAll(false);
+$('#subNames').oninput = () => { const v = $('#subNames').value.slice(0, 2000); if (/[^\s,;]/.test(v)) prefs.subNames = v; else delete prefs.subNames; savePrefs(); clearTimeout(subTimer); subTimer = setTimeout(renameSubs, 400); };
+$('#subNames').onchange = () => { clearTimeout(subTimer); renameSubs(); subField(); };
+$('#subFill').onclick = () => { const f = $('#subNames'); f.value = listNamed().join(', '); f.focus(); f.dispatchEvent(new Event('input')); f.setSelectionRange(f.value.length, f.value.length); $('#subFill').style.display = 'none'; };
+subField();
 $('#vstyle').innerHTML = [['animal', 'Animal Crossing (babillage)', 'Animal Crossing (babble)'], ['kokoro', 'Voix naturelles (à installer)', 'Natural voices (installs on demand)']].map(([v, fr, en]) => `<option value="${v}" data-fr="${fr}" data-en="${en}">${L(fr, en)}</option>`).join(''); $('#vstyle').value = prefs.vstyle; $('#vstyle').onchange = () => { prefs.vstyle = $('#vstyle').value; prefs.vstyleChosen = true; savePrefs(); TTS.init().then(kokoroUI); kokoroUI(); };
 // ---- ⚙ → very natural voices (Kokoro): install box and status, polled while installing
 let kokoroTimer = null;
@@ -3555,7 +3698,7 @@ setInterval(() => {
   if (pos[k] !== S.idx) { delete pos[k]; pos[k] = S.idx; const ks = Object.keys(pos); while (ks.length > 40) delete pos[ks.shift()]; savePrefs(); }
 }, 3000);
 function openKeys() {
-  const rows = [['Space', L('Pause / lecture', 'Pause / play')], ['← / →', L('Replay : événement précédent / suivant', 'Replay: previous / next event')], ['N / Shift+N', L('Replay : moment clé suivant / précédent', 'Replay: next / previous highlight')], ['M', L('Son coupé / activé', 'Mute / unmute')], ['T', L('Vue arbre ↔ appel', 'Tree view ↔ call')], ['R', L('Récapitulatif', 'Recap')], ['L', L('Transcription', 'Transcript')], ['G', L('Aller à ce qui a besoin de vous (ici ou dans une autre session)', 'Go to what needs you (here or in another session)')], ['J / K', L('Agent suivant / précédent qui a besoin de vous', 'Next / previous agent that needs you')], ['Cmd / Ctrl + K', L('Aller à une session', 'Go to a session')], ['?', L('Cette aide', 'This help')], ['Esc', L('Fermer', 'Close')]];
+  const rows = [['Space', L('Pause / lecture', 'Pause / play')], ['← / →', L('Replay : événement précédent / suivant', 'Replay: previous / next event')], ['N / Shift+N', L('Replay : moment clé suivant / précédent', 'Replay: next / previous highlight')], ['M', L('Son : tout, zen (les alertes seules), coupé', 'Sound: all, zen (alerts only), off')], ['T', L('Vue arbre ↔ appel', 'Tree view ↔ call')], ['R', L('Récapitulatif', 'Recap')], ['L', L('Transcription', 'Transcript')], ['G', L('Aller à ce qui a besoin de vous (ici ou dans une autre session)', 'Go to what needs you (here or in another session)')], ['J / K', L('Agent suivant / précédent qui a besoin de vous', 'Next / previous agent that needs you')], ['Cmd / Ctrl + K', L('Aller à une session', 'Go to a session')], ['?', L('Cette aide', 'This help')], ['Esc', L('Fermer', 'Close')]];
   $('#recap .box').innerHTML = `<h1>${L('Raccourcis clavier', 'Keyboard shortcuts')}</h1><table>${rows.map(([k, d]) => `<tr><td class="f"><b>${esc(k)}</b></td><td>${esc(d)}</td></tr>`).join('')}</table><h3>${L('Les états', 'What the states mean')}</h3><table>${[['⚙', L('au travail', 'working')], ['🔗', L('attend un autre agent', 'waiting on another agent')], ['✋', L('attend votre réponse ou votre feu vert (avec « ? » : sans doute, d’après le temps écoulé)', 'waits for your answer or approval (with “?”: probably, from how long it has waited)')], ['⚠', L('bloqué : un sous-agent est silencieux depuis longtemps', 'stalled: a sub-agent has been silent for a long time')], ['✓', L('terminé', 'done')]].map(([k, d]) => `<tr><td class="f">${k}</td><td>${esc(d)}</td></tr>`).join('')}</table><p class="dim" style="margin:14px 0 0;font-size:12px">${L('Les vues Appel, Arbre et Sessions se changent aussi en haut de la fenêtre.', 'You can also switch between Call, Tree and Sessions at the top of the window.')}</p><div style="margin-top:14px"><button class="btn" id="recapx">${L('Fermer', 'Close')}</button></div>`;
   $('#recapx').onclick = () => $('#recap').classList.remove('on'); $('#recap').classList.add('on');
 }

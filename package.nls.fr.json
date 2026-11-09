@@ -13,6 +13,7 @@
   "config.codex.description": "Afficher aussi les sessions Codex (lues dans ~/.codex/sessions, ou $CODEX_HOME). Désactivez pour n’afficher que les sessions Claude Code.",
   "config.vibe.description": "Afficher aussi les sessions Mistral Vibe (lues dans ~/.vibe/logs/session, ou $VIBE_HOME). Désactivez pour ne pas les afficher.",
   "config.omp.description": "Afficher aussi les sessions omp (lues dans ~/.omp/agent/sessions, ou $PI_CODING_AGENT_DIR). Désactivez pour ne pas les afficher.",
+  "config.reply.description": "Permettre à l’appel de taper votre message dans le panneau tmux de la session Claude Code suivie (Linux uniquement, désactivé par défaut). Toute personne pouvant lancer des commandes sous votre compte peut alors taper dans vos sessions.",
   "config.claudePath.description": "Chemin complet de l’exécutable Claude Code, s’il n’est pas trouvé automatiquement (utilisé pour la traduction).",
   "config.charactersPath.description": "Dossier contenant vos propres images de personnages (PNG, GIF ou WebP, 300 Ko maximum chacune). Vide : ~/.agent-standup/characters. lead.png est le chef, you.png est vous, toute autre image est un sous-agent, nom-talk.png est une image facultative bouche ouverte.",
   "config.leadName.description": "Nom de l’agent principal dans l’appel (ses copies portent son nom : Nom 2, Nom 3…). Vide : le nom choisi dans les réglages de l’appel, ou Margot. 24 caractères maximum.",

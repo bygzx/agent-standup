@@ -9,14 +9,42 @@ const crypto = require('crypto');
 const codex = require('./codex.js');     // Codex sessions, read as the same call (see codex.js)
 const vibe = require('./vibe.js');       // Mistral Vibe sessions, the same way (see vibe.js)
 const omp = require('./omp.js');         // omp (Oh My Pi) sessions, the same way (see omp.js)
+const reply = require('./reply.js');     // the human's line, typed into the session's tmux pane (see reply.js); off unless AGENT_STANDUP_REPLY=on
 const SOURCES = [codex, vibe, omp], sourceOf = (proj) => SOURCES.find((m) => m.PROJ === proj) || null, guard = (fn, or) => { try { return fn(); } catch (e) { logError('reader', e); return or; } };   // guard: a session of another tool that cannot be read costs that session, never the list   // the tools other than Claude Code: each lists its sessions under one made-up project
 const kokoro = require('./kokoro.js');   // natural voices, installed on demand (see kokoro.js)
 const zlib = require('zlib');
 const { execFileSync, execFile } = require('child_process');
 
 const PORT = process.env.PORT || 4747;
+const REPLY_TOKEN = crypto.randomBytes(24).toString('hex'), replyTokenOk = (t) => { if (typeof t !== 'string') return false; const a = Buffer.from(t), b = Buffer.from(REPLY_TOKEN); return a.length === b.length && crypto.timingSafeEqual(a, b); };   // made at each start, given only to the page through /api/prefs.js
 // Same place Claude Code writes to: honours CLAUDE_CONFIG_DIR (custom config dirs are common on Linux); AGENT_STANDUP_PROJECTS overrides it.
-const ROOT = process.env.AGENT_STANDUP_PROJECTS || path.join(process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), 'projects');
+const CLAUDE_HOME = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), ONE_FOLDER = !!process.env.AGENT_STANDUP_PROJECTS, EXTRA_HOMES = String(process.env.AGENT_STANDUP_CLAUDE_DIRS || '');
+const ROOT = process.env.AGENT_STANDUP_PROJECTS || path.join(CLAUDE_HOME, 'projects');
+// Some people keep one Claude Code folder per account, each started with its own CLAUDE_CONFIG_DIR (alias claude-pro="CLAUDE_CONFIG_DIR=~/.claude-pro claude", issue #9): the app is started without it and would read neither.
+// So every such folder is read too: ~/.claude, each ~/.claude-<name> (or .claude_<name>, .claude.<name>) that holds a projects folder, and the ones AGENT_STANDUP_CLAUDE_DIRS names ("off": none of them). The one of this process comes first.
+// A ~/.claude-<name> is an account only if Claude Code was started with it: it then keeps its own .claude.json there (.config.json for one an old Claude Code made, .claude-custom-oauth.json…; the default one is in the home folder, so a copy of ~/.claude has none), and its name does not end like a backup's (.bak, -old, " copy 2", -20251001…).
+// A session id is unique, so a session found in two folders (a copy) is taken from the one whose last record is the latest (resumed there), then the larger, then the first: a copy made with cp -r has fresh file dates, which say nothing. With AGENT_STANDUP_PROJECTS (--projects, the tests) that one folder alone is read, as before.
+const sizeOf = (f) => { try { return fs.statSync(f).size; } catch { return -1; } };   // -1 for a file that is gone: an empty one still counts
+const isFile = (f) => { try { return fs.statSync(f).isFile(); } catch { return false; } };
+const stampMemo = new Map();
+function lastStamp(f) {   // the time of a transcript's last record, read from its end (-1: no file); a copy keeps it, where its file date is the copy's. None in the last 64 KB (a huge last record): the file's date
+  let st; try { st = fs.statSync(f); } catch { return -1; } const m = stampMemo.get(f); if (m && m.size === st.size && m.mt === st.mtimeMs) return m.t;
+  let t = st.mtimeMs; try { const fd = fs.openSync(f, 'r'); try { const n = Math.min(st.size, 65536), buf = Buffer.alloc(n); fs.readSync(fd, buf, 0, n, st.size - n); const all = buf.toString('utf8').match(/"timestamp":\s*"[^"]{10,40}"/g); if (all) t = Date.parse(all[all.length - 1].split('"')[3]) || t; } finally { fs.closeSync(fd); } } catch {}
+  stampMemo.delete(f); if (stampMemo.size >= 20000) stampMemo.delete(stampMemo.keys().next().value); stampMemo.set(f, { size: st.size, mt: st.mtimeMs, t }); return t;   /* the oldest out, one at a time */
+}
+const fuller = (a, b) => { const sa = sizeOf(a), sb = sizeOf(b); if (sa === sb) return false; const ta = lastStamp(a), tb = lastStamp(b); return ta !== tb ? ta > tb : sa > sb; };   // of two copies of one session, a the one to read: written later, or holding more. The same size: a copy left as it was, b (the first) without reading either
+let homesMemo = { at: 0, list: [] };
+function claudeHomes() {   // [CLAUDE_HOME, the other folders that hold sessions]; looked for again every 30 s, for an account added while the app runs
+  if (ONE_FOLDER || /^(0|off|no|false)$/i.test(EXTRA_HOMES.trim())) return [CLAUDE_HOME];   // AGENT_STANDUP_CLAUDE_DIRS=off: that one folder (the command line's --config)
+  const now = Date.now(); if (now - homesMemo.at < 30e3) return homesMemo.list;
+  const home = os.homedir(), real = (d) => { try { return fs.statSync(d).isDirectory() ? fs.realpathSync(d) : ''; } catch { return ''; } };
+  let names = []; try { names = fs.readdirSync(home).filter((n) => /^\.claude[-_.][^\\/]+$/.test(n) && !/([-_.~ ](bak|bkp|backup|old|orig|copy|save|saved|prev|archive|snapshot)[\dT_.-]*| \(copy( \d+)?\)| \d+|[-_.]\d{6,}[\dT_.-]*|~)$/i.test(n) && ['.claude.json', '.config.json', '.claude-custom-oauth.json'].some((j) => isFile(path.join(home, n, j)))).sort(); } catch {}
+  const extra = EXTRA_HOMES.split(path.delimiter).map((d) => d.trim()).filter(Boolean).map((d) => path.resolve(d.replace(/^~(?=$|[\\/])/, home)));
+  const list = [CLAUDE_HOME], seen = new Set([real(path.join(CLAUDE_HOME, 'projects')) || path.join(CLAUDE_HOME, 'projects')]);
+  for (const d of [path.join(home, '.claude'), ...names.map((n) => path.join(home, n)), ...extra]) { const r = real(path.join(d, 'projects')); if (r && !seen.has(r)) { seen.add(r); list.push(d); } }
+  homesMemo = { at: now, list }; return list;
+}
+const projRoots = () => { const h = claudeHomes(); return h.length < 2 ? [ROOT] : h.map((d) => path.join(d, 'projects')); };   // one folder, as most people have: exactly the one read before
 const PUBLIC = path.join(__dirname, 'public');
 // Cowork, a tab of the Claude desktop app, keeps each of its sessions in the app's own folder, in the format of Claude Code: <folder>/<account>/<organisation>/<session>/.claude/projects/<project>/<id>.jsonl.
 // They are listed under one made-up project, as the sessions of the other tools are, and read like any Claude Code session from there on.
@@ -58,12 +86,31 @@ function coworkTitle(proj, id) {   // the name the desktop app gave the session,
   let title = ''; try { const j = JSON.parse(fs.readFileSync(f, 'utf8')); if (typeof j.title === 'string') title = j.title.trim().slice(0, 200); } catch {}
   coworkNotes.set(f, { sig, title }); return title;
 }
-const projDir = (proj, id) => (proj === COWORK && coworkMap().get(id)) || path.join(ROOT, proj);   // the folder that holds <id>.jsonl and the sub-agents of that session
-const projects = () => { let names = []; try { names = fs.readdirSync(ROOT); } catch {} return coworkMap().size ? names.concat(COWORK) : names; };
+const dirOf = new Map();   // with several folders: proj/id → the project folder its transcript was found in (a transcript stays where it was written)
+function projDir(proj, id) {   // the folder that holds <id>.jsonl and the sub-agents of that session
+  const cw = proj === COWORK && coworkMap().get(id); if (cw) return cw;
+  const roots = projRoots(); if (roots.length < 2) return path.join(roots[0], proj);
+  const k = proj + '/' + id, known = dirOf.get(k); if (known) return known;
+  let best = ''; for (const r of roots) { const d = path.join(r, proj); if (sizeOf(path.join(d, id + '.jsonl')) >= 0 && (!best || fuller(path.join(d, id + '.jsonl'), path.join(best, id + '.jsonl')))) best = d; }   // in two folders (one copied from the other, the session resumed in it): the one written later (fuller)
+  if (best) { if (dirOf.size > 5000) dirOf.clear(); dirOf.set(k, best); return best; }
+  return path.join(roots[0], proj);
+}
+const projects = () => { const roots = projRoots(); let names = []; for (const r of roots) try { names = names.concat(fs.readdirSync(r)); } catch {} if (roots.length > 1) names = [...new Set(names)]; return coworkMap().size ? names.concat(COWORK) : names; };
 function transcripts(proj) {   // the sessions of a project: { id, file }
   const cw = proj === COWORK ? coworkMap() : null; if (cw && cw.size) return [...cw].map(([id, dir]) => ({ id, file: path.join(dir, id + '.jsonl') }));
-  const dir = path.join(ROOT, proj); let files; try { files = fs.readdirSync(dir); } catch { return []; }
-  return files.filter((f) => f.endsWith('.jsonl')).map((f) => ({ id: f.slice(0, -6), file: path.join(dir, f) }));
+  const roots = projRoots(), out = [], seen = new Map();
+  for (const r of roots) {
+    const dir = path.join(r, proj); let files; try { files = fs.readdirSync(dir); } catch { continue; }
+    for (const f of files) {
+      if (!f.endsWith('.jsonl')) continue; const id = f.slice(0, -6), row = { id, file: path.join(dir, f) };
+      if (roots.length > 1) {   // a session in two folders is listed once, from the one written later (fuller, see projDir), which dirOf keeps up to date at each look
+        const was = seen.get(id); if (was && !fuller(row.file, was.file)) continue;
+        if (dirOf.size > 5000) dirOf.clear(); dirOf.set(proj + '/' + id, dir); if (was) { was.file = row.file; continue; } seen.set(id, row);
+      }
+      out.push(row);
+    }
+  }
+  return out;
 }
 
 const blocks = (rec) => {
@@ -532,7 +579,7 @@ const PR_URL = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/pull\/\d+$/;   // noth
 const askOf = (b) => { const q = b.name === 'AskUserQuestion' && b.input && Array.isArray(b.input.questions) && b.input.questions[0] && b.input.questions[0].question; return typeof q === 'string' ? clip(q.trim(), 200) : ''; };   // the question a session stopped on, for its card
 const callOf = (b) => { const i = b.input || {}, v = b.name === 'Bash' ? i.command : /^(Edit|Write|MultiEdit|NotebookEdit)$/.test(b.name) ? path.basename(String(i.file_path || i.notebook_path || '')) : b.name === 'WebFetch' ? i.url : ''; return typeof v === 'string' && v.trim() ? b.name + '(' + clip(v.replace(/\s+/g, ' ').trim(), 160) + ')' : ''; };   // what a call waiting for your go-ahead would do, written the way Claude Code shows it: Bash(npm test)
 const PLAN_FILE = /[\\/]\.claude[\\/]plans[\\/][^\\/]+\.md$/, PLAN_DIR = process.env.CLAUDE_CONFIG_DIR ? path.join(process.env.CLAUDE_CONFIG_DIR, 'plans') + path.sep : '';
-const planFile = (f) => PLAN_FILE.test(f) || (!!PLAN_DIR && f.startsWith(PLAN_DIR) && f.endsWith('.md'));   // also where a CLAUDE_CONFIG_DIR set elsewhere keeps them
+const planFile = (f) => PLAN_FILE.test(f) || (!!PLAN_DIR && f.startsWith(PLAN_DIR) && f.endsWith('.md')) || (f.endsWith('.md') && claudeHomes().slice(1).some((h) => f.startsWith(path.join(h, 'plans') + path.sep)));   // also where a CLAUDE_CONFIG_DIR set elsewhere keeps them, and the other folders read (claudeHomes)
 const planDoc = (f) => { try { const st = fs.statSync(f); if (!st.isFile() || st.size > 262144) return ''; return clip(fs.readFileSync(f, 'utf8').trim(), 4000); } catch { return ''; } };   // the whole plan, for the shared screen
 const planText = (f) => { try { const st = fs.statSync(f); if (!st.isFile() || st.size > 262144) return ''; return clip(fs.readFileSync(f, 'utf8').trim(), 1200); } catch { return ''; } };
 const menuOf = (b) => {   // what a menu waiting for you shows, from the call it waits on, word for word: the questions and their options in their order (the terminal numbers them the same way), the command, the file, the plan
@@ -546,31 +593,36 @@ const menuOf = (b) => {   // what a menu waiting for you shows, from the call it
 };
 // Claude Code also keeps <config>/sessions/<pid>.json for each open session: its status (busy, idle, or waiting while a menu waits for your answer: a permission, a question) and since when.
 // It is the only sign of a Bash approval: in the transcript, a command waiting for your go-ahead looks just like one that runs. A file whose process has ended is left out.
-const CC_SESSIONS = process.env.AGENT_STANDUP_CC_SESSIONS || path.join(process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), 'sessions');
+const CC_SESSIONS = process.env.AGENT_STANDUP_CC_SESSIONS || path.join(process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), 'sessions'), CC_SESSIONS_SET = !!process.env.AGENT_STANDUP_CC_SESSIONS;
+const statusDirs = () => { const h = CC_SESSIONS_SET ? [] : claudeHomes(); return h.length < 2 ? [CC_SESSIONS] : h.map((d) => path.join(d, 'sessions')); };   // each folder read keeps the status of its own sessions
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; } };
 function liveStatus() {   // session id → { status, since, pid, ep (where it runs: claude-vscode, cli, claude-desktop, sdk-cli…), and for missingTranscripts: raw (the status as written), cwd, kind, startedAt, version, updatedAt (when the file was last written: a /clear moves it, and the id, but not statusUpdatedAt) }
-  const out = new Map(); let names = []; try { names = fs.readdirSync(CC_SESSIONS); } catch { return out; }
-  for (const n of names) { if (!/^\d+\.json$/.test(n)) continue; try { const s = JSON.parse(fs.readFileSync(path.join(CC_SESSIONS, n), 'utf8')); if (s && typeof s.sessionId === 'string' && /^(busy|idle|waiting)$/.test(s.status) && Number.isInteger(s.pid) && s.pid > 0 && alive(s.pid)) out.set(s.sessionId, { status: s.status !== 'waiting' ? s.status : s.waitingFor === 'dialog open' ? 'idle' : s.entrypoint === 'sdk-cli' ? 'busy' : s.status, since: Number(s.statusUpdatedAt) || 0, pid: s.pid, ep: String(s.entrypoint || ''), raw: s.status, cwd: typeof s.cwd === 'string' ? s.cwd : '', kind: typeof s.kind === 'string' ? s.kind : '', startedAt: Number(s.startedAt) || 0, version: typeof s.version === 'string' ? s.version : '', updatedAt: Number(s.updatedAt) || 0 }); } catch {} }   /* a dialog you opened yourself (/model, /config, /mcp…) also says waiting: it is not a question for you. Nor is a menu of a session started with claude -p (entrypoint sdk-cli): its question goes to the program that started it. An Agent SDK host (sdk-ts, sdk-py: Zed, a home-made app) may show its menus to a person, so those are kept */
+  const out = new Map(), later = (a, b) => Math.max(a.updatedAt, a.since) > Math.max(b.updatedAt, b.since);
+  for (const [i, dir] of statusDirs().entries()) { const into = i ? new Map() : out; let names = []; try { names = fs.readdirSync(dir); } catch { continue; }
+  for (const n of names) { if (!/^\d+\.json$/.test(n)) continue; try { const s = JSON.parse(fs.readFileSync(path.join(dir, n), 'utf8')); if (s && typeof s.sessionId === 'string' && /^(busy|idle|waiting)$/.test(s.status) && Number.isInteger(s.pid) && s.pid > 0 && alive(s.pid)) into.set(s.sessionId, { status: s.status !== 'waiting' ? s.status : s.waitingFor === 'dialog open' ? 'idle' : s.entrypoint === 'sdk-cli' ? 'busy' : s.status, since: Number(s.statusUpdatedAt) || 0, pid: s.pid, ep: String(s.entrypoint || ''), raw: s.status, cwd: typeof s.cwd === 'string' ? s.cwd : '', kind: typeof s.kind === 'string' ? s.kind : '', startedAt: Number(s.startedAt) || 0, version: typeof s.version === 'string' ? s.version : '', updatedAt: Number(s.updatedAt) || 0, procStart: s.procStart, name: typeof s.name === 'string' ? s.name : '' }); } catch {} }   /* a dialog you opened yourself (/model, /config, /mcp…) also says waiting: it is not a question for you. Nor is a menu of a session started with claude -p (entrypoint sdk-cli): its question goes to the program that started it. An Agent SDK host (sdk-ts, sdk-py: Zed, a home-made app) may show its menus to a person, so those are kept */
+  if (i) { const byPid = new Map([...out].map(([k, v]) => [v.pid, k])); for (const [k, v] of into) { const o = out.get(k), pk = byPid.get(v.pid), p = pk != null && pk !== k ? out.get(pk) : null; if ((o && !later(v, o)) || (p && !later(v, p))) continue; if (p) out.delete(pk); out.set(k, v); byPid.set(v.pid, k); } }   // a folder copied while a session ran keeps its status frozen: of two that name the same session, or the same process (its id changed since with /clear), the one written last
+  }
   return out;
 }
+reply.use(liveStatus);   // reply.js finds the session to type into with this same reader (procStart: to tell a reused pid, name: the recipient shown)
 // A Claude Code session that is open and has worked, yet whose transcript is nowhere in the projects folder read here. The call cannot show it; the page says so, and why it may be (issue #9). Read from the status files alone, nothing sent.
 // Only one cause is visible this way (Claude Code 2.1.304, tried): CLAUDE_CODE_SKIP_PROMPT_HISTORY=1 writes the status file (interactive, idle/busy) and shows "Transcript saving is off", but no transcript.
-// An inherited CLAUDE_CODE_CHILD_SESSION=1 writes neither, and another CLAUDE_CONFIG_DIR puts the status file in that other folder: neither leaves anything here. What is listed may also be a cause not known yet.
+// An inherited CLAUDE_CODE_CHILD_SESSION=1 writes neither, and another CLAUDE_CONFIG_DIR puts the status file in that other folder: neither leaves anything here (that folder is read too when it is one of claudeHomes). What is listed may also be a cause not known yet.
 // Listed only once this server has seen the session busy, under its current id, for 5 s: a session just opened, one where you opened /model or /config, and one right after /clear
 // (a new id and updatedAt, while status and statusUpdatedAt are still those of the id before) have written no transcript yet, and need none.
 let missingMemo = { at: 0, list: [] }; const transcriptSeen = new Set(), busySeen = new Map();   // transcriptSeen: ids found once are not looked for again, a transcript stays where it was written · busySeen: id → when it was first seen busy (at most 500)
 function missingTranscripts() {   // [{ id, cwd, name, version, ep, since }]: one look every 10 s at most
   if (process.env.AGENT_STANDUP_PROJECTS && !process.env.AGENT_STANDUP_CC_SESSIONS) return [];   // sessions read from another folder than the one these status files belong to: every live session would look as if it wrote nothing
   const now = Date.now(); if (now - missingMemo.at < 10e3) return missingMemo.list;
-  const list = []; let dirs = null;
+  const list = [], roots = projRoots(); let dirs = null;
   for (const [id, w] of liveStatus()) {
     if ((w.kind && w.kind !== 'interactive') || /^sdk-(cli|ts|py)$/.test(w.ep) || transcriptSeen.has(id) || !/^[\w-]+$/.test(id)) continue;   // a session a program runs keeps no transcript a person would look for
     if (w.raw === 'busy' && w.since >= w.updatedAt && !busySeen.has(id)) { if (busySeen.size >= 500) busySeen.delete(busySeen.keys().next().value); busySeen.set(id, Math.min(now, w.since || now)); }   // a status written for this id (an older Claude Code writes no updatedAt: 0)
     if (!(now - (busySeen.get(id) || now) >= 5e3)) continue;   // Claude Code writes the transcript with the first message: never busy yet, or only just
     const name = id + '.jsonl', key = w.cwd.replace(/[^a-zA-Z0-9]/g, '-');   // Claude Code's project folder naming: the folder of its cwd, looked at first
-    if ((key && mtimeOf(path.join(ROOT, key, name))) || coworkMap().has(id)) { transcriptSeen.add(id); continue; }
-    if (!dirs) { dirs = []; try { dirs = fs.readdirSync(ROOT); } catch {} }   // a long path is shortened in its folder name: every folder, then
-    if (dirs.some((d) => mtimeOf(path.join(ROOT, d, name)))) { transcriptSeen.add(id); continue; }
+    if ((key && roots.some((r) => mtimeOf(path.join(r, key, name)))) || coworkMap().has(id)) { transcriptSeen.add(id); continue; }
+    if (!dirs) { dirs = []; for (const r of roots) try { dirs = dirs.concat(fs.readdirSync(r).map((d) => path.join(r, d))); } catch {} }   // a long path is shortened in its folder name: every folder, then
+    if (dirs.some((d) => mtimeOf(path.join(d, name)))) { transcriptSeen.add(id); continue; }
     list.push({ id, cwd: w.cwd, name: w.cwd ? path.basename(w.cwd) : '', version: w.version, ep: w.ep, since: w.startedAt || w.since });
   }
   missingMemo = { at: now, list }; return list;
@@ -906,7 +958,7 @@ const projCwds = new Map(), dirKey = (d) => String(d || '').replace(/[^a-zA-Z0-9
 const foldKey = (k) => (process.platform === 'win32' ? String(k).toLowerCase() : k);   // Windows: a folder is the same whatever its case (the editor sends C:, Claude Code may have written c:)
 function projCwd(proj) {
   if (projCwds.has(proj)) return projCwds.get(proj);
-  let cwd = ''; for (const { id } of transcripts(proj).slice(0, 3)) { try { const m = /"cwd":"((?:[^"\\]|\\.)*)"/.exec(readHead(path.join(projDir(proj, id), id + '.jsonl'), 64 * 1024)); if (m) { cwd = JSON.parse('"' + m[1] + '"'); break; } } catch {} }
+  let cwd = ''; for (const { id } of transcripts(proj).slice(0, 3)) { try { const m = /"cwd":"((?:[^"\\]|\\.)*)"/.exec(readHead(path.join(projDir(proj, id), id + '.jsonl'), 64 * 1024)); if (m) { const c = JSON.parse('"' + m[1] + '"'); if (foldKey(dirKey(c)) === foldKey(proj)) { cwd = c; break; } } } catch {} }   /* a session that started elsewhere (a scratch folder) does not hide the others */
   const sure = !!cwd && foldKey(dirKey(cwd)) === foldKey(proj); if (sure) projCwds.set(proj, cwd); return sure ? cwd : '';   // kept once it is sure: the folder whose name is the project's
 }
 const inFolder = (proj, key) => { const p = foldKey(proj), k = foldKey(key); if (p === k) return true; if (!p.startsWith(k + '-')) return false; const cwd = projCwd(proj); if (!cwd) return true; for (let d = cwd; d;) { if (foldKey(dirKey(d)) === k) return true; const up = path.dirname(d); if (up === d) return false; d = up; } return false; };
@@ -968,6 +1020,7 @@ function readNew(file, agent, journal, record = parseRecord) {
   return st;
 }
 function parseRecord(st, r) {
+  if (!st.cwd && typeof r.cwd === 'string' && r.cwd) st.cwd = r.cwd;   // the folder the session started in; later cd records do not change its project
   const agent = st.agent, ts = Date.parse(r.timestamp) || 0, push = (e) => { e.k = agent + ':' + st.raw.length; st.raw.push(e); return e; };   // k: the event's key in the live feed = whose file + its rank in it. A file is only ever appended to, so the rank never changes (and when it is not, the whole file is read again under a new number, see readNew)
   if (ts > (st.lastTs || 0)) st.lastTs = ts;
   if (st.journal) { if (r.type === 'result' && r.agentId) push({ ts: 0, agent, kind: 'wfdone', child: String(r.agentId).replace(/[^\w.-]/g, '_') }); return; }   // a workflow's journal: one line when an agent starts, one when it hands its result back (no time on them)
@@ -1047,6 +1100,19 @@ function readMeta(f) {
   try { const mt = fs.statSync(f).mtimeMs, c = metaCache.get(f); if (c && c.mtime === mt) return c.value; const v = JSON.parse(fs.readFileSync(f, 'utf8')); if (metaCache.size > 3000) metaCache.clear(); metaCache.set(f, { mtime: mt, value: v }); return v; } catch { return {}; }
 }
 
+// The actual project behind a session, not the provider bucket (_codex, _vibe).
+// Keep the full folder: dashed project keys cannot distinguish app/old from app-old.
+// A Claude Code session is filed under its project's folder: the folder whose name that is comes first (projCwd), so a session that started in a scratch folder, an old transcript without cwd and a live one whose first cwd is not written yet all share their project's name.
+const leadProjects = new Map(), bareDir = (d) => { const n = path.normalize(d), root = path.parse(n).root; return n.length > root.length ? n.replace(/[\\/]+$/, '') : n; };   // /work/app/ and /work/app are one folder
+function leadProject(proj, id, recordedCwd) {
+  const memo = proj + '/' + id; if (leadProjects.has(memo)) return leadProjects.get(memo);
+  const sx = sourceOf(proj), cwd = sx ? guard(() => sx.cwd(id), '') : projCwd(proj) || recordedCwd;
+  // Cowork's folders live in separate VMs: identical cwd strings there need not be one project.
+  if (proj === COWORK) return { key: 'cowork:' + projDir(proj, id), label: cwd || coworkTitle(proj, id) || id };
+  if (cwd) { const v = { key: 'cwd:' + foldKey(bareDir(cwd)), label: cwd }; if (leadProjects.size > 3000) leadProjects.clear(); leadProjects.set(memo, v); return v; }   // kept once a folder is known: it no longer changes
+  return sx ? null : { key: 'claude:' + proj, label: proj };   // older Claude transcripts without cwd still have a project folder; an unknown provider folder has no override
+}
+
 function buildTimeline(proj, id, files = []) {
   const sx = sourceOf(proj), rec = recordOf(sx), base = projDir(proj, id), mainFile = sx ? sx.fileOf(id) || '' : path.join(base, id + '.jsonl');   // source readers supply their own session and child files; the timeline and page are shared
   if (!fs.existsSync(mainFile)) throw new Error('session not found');
@@ -1063,8 +1129,9 @@ function buildTimeline(proj, id, files = []) {
   for (const j of subs.journals) { const st = readNew(j.file, 'wf:' + j.run, true), run = runs[j.run]; files.push(j.file); if (st && run) for (const e of st.raw) if (run.agents[e.child]) run.done.add(run.agents[e.child]); }
   const childByTool = {};   // Agent tool_use id → the sub-agent it created, so we know who ordered whom
   for (const a of Object.values(agents)) if (a.toolUseId) childByTool[a.toolUseId] = a.id;
-  const called = {}, born = {}; for (const st of states) if (st) { if (st.raw.length) born[st.agent] = st.raw[0].ts; for (const e of st.raw) if (e.kind === 'agentcall' && e.nm && childByTool[e.toolId]) called[childByTool[e.toolId]] = e.nm; }
+  const called = {}, born = {}; for (const st of states) if (st) { const b0 = (st.prompt && st.prompt.ts) || (st.raw.length && st.raw[0].ts); if (b0) born[st.agent] = b0; for (const e of st.raw) if (e.kind === 'agentcall' && e.nm && childByTool[e.toolId]) called[childByTool[e.toolId]] = e.nm; }
   const sameName = {}; for (const a of Object.values(agents).filter((x) => x.id !== 'main').sort((x, y) => (born[x.id] || Infinity) - (born[y.id] || Infinity) || (x.id < y.id ? -1 : 1))) {   // in the order they started, so that a second agent of the same name is the one numbered 2 and stays so
+    if (born[a.id] || a.startedAt > 0) a.born = born[a.id] || a.startedAt;   // when it started (its prompt, its first line, or what Codex recorded): the page names the agents in that order (byBorn in index.html), so that a reload gives each the same name
     const n = ownName(called[a.id]) || ownName(a.name) || ownName(a.type, true); if (n) { const k = n.toLowerCase(); sameName[k] = (sameName[k] || 0) + 1; a.own = sameName[k] > 1 ? n + ' ' + sameName[k] : n; }
   }
   const runByTool = {}; for (const st of states) if (st) for (const e of st.raw) if (e.kind === 'wfrun' && runs[e.run] && !runs[e.run].by) { runs[e.run].by = e.agent; runs[e.run].toolId = e.toolId; runByTool[e.toolId] = runs[e.run]; }   // Workflow tool_use id → the run it started
@@ -1115,7 +1182,7 @@ function buildTimeline(proj, id, files = []) {
   const real = merged.find((e) => e.kind !== 'usage' && e.kind !== 'finish' && e.kind !== 'compact' && e.kind !== 'tasks'), first = real ? real.ts : 0, last = merged.length ? merged[merged.length - 1].ts : 0;   // time zero = the first thing said or done
   const marks = !sx && states[0] && (states[0].stops || !states[0].lead) ? { marks: 1 } : {};   // a Claude Code session whose turns end with a mark, also before the lead has written anything: a session that has not closed a turn yet is not one without marks, and its lead is not "done" each time it thinks for a while
   const ms = states.find((x) => x && x.agent === 'main'), cost = ms && ms.cost ? { usd: Math.round(ms.cost.usd * 1e4) / 1e4, final: !merged.some((e) => e.kind === 'usage' && e.ts > ms.cost.at) } : null;   // final: nothing was spent after Claude Code counted it (else it is a floor)
-  return { id, proj, agents: Object.values(agents), events: merged.map((e) => ({ ...e, t: Math.max(0, e.ts - first) })), durationMs: last - first, recentUntil, ...marks, ...(cost ? { cost } : {}) };
+  return { id, proj, project: leadProject(proj, id, ms && ms.cwd), agents: Object.values(agents), events: merged.map((e) => ({ ...e, t: Math.max(0, e.ts - first) })), durationMs: last - first, recentUntil, ...marks, ...(cost ? { cost } : {}) };
 }
 
 // Ask the local `claude` CLI (uses the user's existing login) to map a JSON array of strings to another array. Cached.
@@ -1436,7 +1503,7 @@ function start(port = PORT) {
   const sendFile = (fp) => { const s = fs.createReadStream(fp); s.on('error', () => res.destroy()); s.pipe(res); };   // a file that vanished between the check and the read ends this answer, not the server
   // Endpoints with side effects (they spawn programs or claim the sound), and the one that serves pictures from a session, refuse requests that a browser marks as coming from another site, e.g. an <img> on a web page.
   const sfs = req.headers['sec-fetch-site'];
-  if (sfs && sfs !== 'same-origin' && sfs !== 'none' && (req.method !== 'GET' || ['/api/translate', '/api/quips', '/api/warm', '/api/audio', '/api/tts', '/api/prefs', '/api/prefs.js', '/api/voices', '/api/kokoro', '/api/kokoro/install', '/api/media', '/api/taskout', '/api/artifact', '/api/errors', '/api/packs', '/api/update'].includes(url.pathname))) { res.writeHead(403); return res.end('forbidden'); }
+  if (sfs && sfs !== 'same-origin' && sfs !== 'none' && (req.method !== 'GET' || ['/api/translate', '/api/quips', '/api/warm', '/api/audio', '/api/tts', '/api/prefs', '/api/prefs.js', '/api/voices', '/api/kokoro', '/api/kokoro/install', '/api/media', '/api/taskout', '/api/artifact', '/api/errors', '/api/packs', '/api/update', '/api/reply'].includes(url.pathname))) { res.writeHead(403); return res.end('forbidden'); }
   const readBody = (cb, max = 262144) => {   // request bodies are small JSON: stop reading beyond 256 KB (or max) and give up after 10 s
     const chunks = []; let size = 0, over = false; req.setTimeout(10000, () => req.destroy());
     if (+req.headers['content-length'] > max) { res.writeHead(413); res.end('too large'); return req.destroy(); }
@@ -1474,7 +1541,7 @@ function start(port = PORT) {
         .then((f) => { res.writeHead(200, { 'content-type': 'audio/wav', 'cache-control': 'max-age=86400' }); sendFile(f); })
         .catch((e) => json({ error: String(e.message) }, 400));
     }
-    if (url.pathname === '/api/prefs.js') { res.writeHead(200, { 'content-type': 'application/javascript', 'cache-control': 'no-store' }); return res.end('window.SAVED_PREFS = ' + JSON.stringify(readPrefs()).replace(/</g, '\\u003c') + '; window.AS_APP = ' + JSON.stringify(appKind()).replace(/</g, '\\u003c') + ';'); }
+    if (url.pathname === '/api/prefs.js') { res.writeHead(200, { 'content-type': 'application/javascript', 'cache-control': 'no-store' }); return res.end('window.SAVED_PREFS = ' + JSON.stringify(readPrefs()).replace(/</g, '\\u003c') + '; window.AS_APP = ' + JSON.stringify(appKind()).replace(/</g, '\\u003c') + ';' + (reply.on() ? 'window.REPLY_TOKEN = "' + REPLY_TOKEN + '";' : '')); }
     if (url.pathname === '/api/prefs' && req.method === 'PUT') return readBody((body) => { try { let v = JSON.parse(body); if (!v || typeof v !== 'object' || Array.isArray(v)) throw new Error('prefs must be an object'); const cur = readPrefs() || {}; const pt = v._patch && typeof v._patch === 'object' && !Array.isArray(v._patch) ? v._patch : null, set = pt && pt.set && typeof pt.set === 'object' && !Array.isArray(pt.set) ? pt.set : {}; if (pt && (!('_t' in set) || !('_t' in v) || +set._t === +v._t)) { const del = Array.isArray(pt.del) ? pt.del : []; v = { ...cur, ...set }; for (const k of del) if (typeof k === 'string' && !(k in set)) delete v[k]; } delete v._patch;   /* a patch dated otherwise than the settings it came with is a stale copy (a page before 1.42 that read one from the file): those settings are written whole */   /* a page sends what it changed, merged into the file as it is now: a window opened earlier no longer puts back what another one changed. A whole object (an older page) still replaces the file */ if ((+cur.shareUsageT || 0) > (+v.shareUsageT || 0)) { v.shareUsage = cur.shareUsage; v.shareUsageT = cur.shareUsageT; v.usageAsked = cur.usageAsked; } if ((+cur.updateNoticeT || 0) > (+v.updateNoticeT || 0)) { v.updateNotice = cur.updateNotice; v.updateNoticeT = cur.updateNoticeT; v.updateAsked = cur.updateAsked; } writePrefs(v);   /* the usage answer: a page opened before it was changed elsewhere (another tab, the desktop app) writes back its old settings, not its old answer */ json({ ok: true }); } catch (e) { json({ error: String(e.message || e) }, 400); } });
     if (url.pathname === '/api/prefs') return json(readPrefs() || {});
     if (url.pathname === '/api/answer' && req.method === 'POST') return readBody((body) => { let v = {}; try { v = JSON.parse(body); } catch {} json(answerIn(String((v && v.id) || ''))); });   /* a click on what needs you: open it where it can be answered (answerIn) */
@@ -1525,6 +1592,13 @@ function start(port = PORT) {
       const body = Buffer.from((/^\s*<!doctype/i.test(page.html) ? '' : '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">') + page.html, 'utf8');   // an artifact is published as the inside of a page: claude.ai adds the rest, and so does this
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'content-length': body.length, 'content-security-policy': artifactCsp(q('net') === '1'), 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'cache-control': 'private, no-store' }); return res.end(body);
     }
+    if (url.pathname === '/api/reply') {   // the human's line: can this session hear it (GET), type it into its terminal (POST)
+      if (!reply.on()) { res.writeHead(404); return res.end('not found'); }
+      if (process.platform !== 'linux') return req.method === 'POST' ? json({ error: 'platform' }, 409) : json({ ok: false, why: 'platform' });   // said before the peer check, which cannot work there either
+      const peer = reply.peerUid(req.socket); if (peer == null || peer !== process.getuid()) return json({ error: 'peer' }, 403);   // another local user, or a process we cannot tell: the token alone is readable by anyone who can reach the port
+      if (req.method === 'POST') return readBody((body) => { let b = {}; try { b = JSON.parse(body) || {}; } catch {} if (!replyTokenOk(b.token)) return json({ error: 'token' }, 403); reply.send(String(b.id || ''), b.text).then((r) => json(r, r.ok ? 200 : r.error === 'text' ? 400 : 409), (e) => { logError('reply', e); json({ error: 'tmux' }, 500); }); }, 16384);
+      return reply.lookup(url.searchParams.get('id') || '').then(({ pane, ...r }) => json(r), (e) => { logError('reply', e); json({ ok: false, why: 'tmux' }); });
+    }
     if (url.pathname === '/api/session') {
       const proj = url.searchParams.get('proj') || '', sid = url.searchParams.get('id') || '', SAFE = /^[\w.\-]+$/;
       if (!SAFE.test(proj) || !SAFE.test(sid) || proj === '..' || sid === '..' || proj.length > 200 || sid.length > 200) { res.writeHead(400); return res.end('bad request'); }
@@ -1538,10 +1612,10 @@ function start(port = PORT) {
         res.writeHead(200, { 'content-type': 'application/json', ...(gz ? { 'content-encoding': 'gzip' } : {}), vary: 'accept-encoding' });
         return res.end(gz ? entry.gz : entry.json);
       }
-      if (ep == null) return json({ id: tl.id, agents: tl.agents, total: tl.events.length, events: tl.events.slice(+after) });   // a page loaded before 1.25.7 still asks by position
+      if (ep == null) return json({ id: tl.id, project: tl.project, agents: tl.agents, total: tl.events.length, events: tl.events.slice(+after) });   // a page loaded before 1.25.7 still asks by position
       const a = +after; if (ep !== tl.ep || !(a >= 0 && a <= tl.seq)) return json({ resync: true });   // not the feed this page was following (restart, session dropped from memory, transcript rewritten): it loads the session again
-      if (a === tl.seq) { if (!entry.idle) entry.idle = JSON.stringify({ id: tl.id, agents: tl.agents, ep: tl.ep, seq: tl.seq, marks: tl.marks, ...(tl.cost ? { cost: tl.cost } : {}), events: [] }); res.writeHead(200, { 'content-type': 'application/json' }); return res.end(entry.idle); }   // nothing new, which is the answer to nearly every poll: written once
-      return json({ id: tl.id, agents: tl.agents, ep: tl.ep, seq: tl.seq, marks: tl.marks, ...(tl.cost ? { cost: tl.cost } : {}), events: feedSince(entry, a) });   // new events and changed ones alike, whole, under the key they always had
+      if (a === tl.seq) { if (!entry.idle) entry.idle = JSON.stringify({ id: tl.id, project: tl.project, agents: tl.agents, ep: tl.ep, seq: tl.seq, marks: tl.marks, ...(tl.cost ? { cost: tl.cost } : {}), events: [] }); res.writeHead(200, { 'content-type': 'application/json' }); return res.end(entry.idle); }   // nothing new, which is the answer to nearly every poll: written once
+      return json({ id: tl.id, project: tl.project, agents: tl.agents, ep: tl.ep, seq: tl.seq, marks: tl.marks, ...(tl.cost ? { cost: tl.cost } : {}), events: feedSince(entry, a) });   // new events and changed ones alike, whole, under the key they always had
     }
     const pk = url.pathname.match(/^\/packs\/([a-z]+)\/(.*)$/);
     if (url.pathname.startsWith('/characters/') || (pk && packDir(pk[1]))) {   // only plain image files of the characters folder (or of a built-in pack), by exact name
@@ -1559,7 +1633,7 @@ function start(port = PORT) {
   } catch (e) { logError(req.method + ' ' + url.pathname, e); if (res.headersSent) return res.destroy(); json({ error: String(e.message || e) }, 500); }
   }).listen(port, '127.0.0.1', function () { console.log(`Agent Standup → http://localhost:${this.address().port}`); });
 }
-module.exports = { answerIn, missingTranscripts, noteEditor, forgetEditor, _winArg: winArg, start, currentSession, shutdown, findClaude, bundledClaude, boardRows, sessionRows: listSessions, charactersDir, listCharacters, packsDir, installPack, logError, updateInfo, _reveal: reveal, _scrub: { tidy, homeRe }, _artifact: { page: artifactPage, csp: artifactCsp } };
+module.exports = { answerIn, missingTranscripts, noteEditor, forgetEditor, _winArg: winArg, start, currentSession, shutdown, findClaude, bundledClaude, boardRows, transcriptFile: (proj, id) => path.join(projDir(proj, id), id + '.jsonl'), sessionRows: listSessions, charactersDir, listCharacters, packsDir, installPack, logError, updateInfo, _reveal: reveal, _scrub: { tidy, homeRe }, _artifact: { page: artifactPage, csp: artifactCsp } };
 if (require.main === module && process.env.AGENT_STANDUP_CHILD === '1' && typeof process.send === 'function') {   // started by the VS Code extension in a process of its own (see extension.js): reading a large session no longer stops the editor's extensions. Asked for by name: pm2 and others give any app a channel too
   const srv = start(+process.env.PORT || 0), tell = (m) => { try { process.send(m); } catch {} };
   srv.on('listening', () => tell({ port: srv.address().port })).on('error', (e) => { tell({ error: e.code || String(e) }); process.exit(1); });

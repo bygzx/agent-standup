@@ -96,8 +96,8 @@ details { margin:14px 0 0; color:var(--dim) } details summary { cursor:pointer; 
 .langs { color:var(--dim); font-size:15px }
 p a, .fine a, li a { color:var(--accent) } p a:hover, .fine a:hover, li a:hover { text-decoration:underline }
 /* character animation: all state-driven from the tile's classes */
-  .fig { transform-origin:50px 76px; animation:bob 4.4s ease-in-out infinite; animation-delay:var(--d,0s) }   /* the endless motions are moved by one clock in the script (IDLE_ANIMS), not 60 times a second by the browser */ @keyframes bob { 50% { transform:translateY(-.9px) } }
-  .tile.speaking .fig { animation:talk .46s ease-in-out infinite } .tile.speaking .fig.still { animation:bob 4.4s ease-in-out infinite; animation-delay:var(--d,0s) }   /* a character with a head of its own: the body does not squash, the head nods */
+  .fig { transform-origin:50px 76px; animation:bob var(--bd,4.4s) ease-in-out infinite; animation-delay:var(--d,0s) }   /* the endless motions are moved by one clock in the script (IDLE_ANIMS), not 60 times a second by the browser */ @keyframes bob { 50% { transform:translateY(-.9px) } }
+  .tile.speaking .fig { animation:talk .46s ease-in-out infinite } .tile.speaking .fig.still { animation:bob var(--bd,4.4s) ease-in-out infinite; animation-delay:var(--d,0s) }   /* a character with a head of its own: the body does not squash, the head nods */
   .chead { transform-origin:50px 44px } .tile.speaking .chead, #pcam.speaking .chead { animation:nod .6s ease-in-out infinite } @keyframes nod { 35% { transform:rotate(-.25deg) translateY(-.18px) } 75% { transform:rotate(.15deg) } }   /* very light: the mouth does the talking */ @keyframes talk { 50% { transform:scale(1.025,.985) translateY(-.5px) } }
   .tile.vanishing { pointer-events:none; z-index:3; animation:vanish 1.2s cubic-bezier(.45,0,.75,.35) forwards }
   @keyframes vanish { 0% { filter:none; transform:none; opacity:1 } 16% { filter:brightness(1.7) saturate(1.5); transform:scale(1.05) } 55% { filter:brightness(2.3) blur(1.5px); transform:scale(.88) rotate(-3deg); opacity:.85 } 100% { filter:brightness(3.4) blur(11px); transform:scale(.12) rotate(11deg); opacity:0 } }
@@ -108,12 +108,13 @@ p a, .fine a, li a { color:var(--accent) } p a:hover, .fine a:hover, li a:hover 
   .toast.offer { pointer-events:auto; animation:none; display:flex; align-items:center; gap:8px; padding:4px 6px 4px 12px; order:9 } .toast.offer .btn { padding:3px 10px; font-size:12px; white-space:nowrap } .toast.offer .ic { font-size:11px; padding:2px 6px }
 #packNoteI { width:48px; height:36px; border-radius:4px; object-fit:cover; flex:none; cursor:pointer; margin-left:-6px }   /* the offer of the real voices: stays until answered, under the passing toasts */
   .toast { background:rgba(27,29,39,.92); border:1px solid var(--line); border-radius:99px; padding:5px 12px; font-size:12px; animation:toast 3s ease forwards } @keyframes toast { 0% { opacity:0; transform:translateY(6px) } 10%, 80% { opacity:1; transform:none } 100% { opacity:0 } }
-  .eye { transform-box:fill-box; transform-origin:center; animation:blink 4.6s infinite; animation-delay:var(--d,0s) } @keyframes blink { 0%,94%,100% { transform:scaleY(1) } 97% { transform:scaleY(.08) } }
+  .eye { transform-box:fill-box; transform-origin:center; animation:blink var(--kd,4.6s) infinite; animation-delay:var(--d,0s) } @keyframes blink { 0%,94%,100% { transform:scaleY(1) } 97% { transform:scaleY(.08) } }
   .brow { transform-box:fill-box; transform-origin:center; transition:transform .25s } .tile.speaking .brow { animation:brow .7s ease-in-out infinite } @keyframes brow { 50% { transform:translateY(-1.1px) } }
   .tile.working .brow.l { transform:rotate(13deg) translateY(.5px) } .tile.working .brow.r { transform:rotate(-13deg) translateY(.5px) } .tile.working .pupil { transform:translateY(1.2px) }
-  .arm.l { transform-origin:27px 48px } .arm.r { transform-origin:73px 48px } .tile.speaking .arm.r { animation:wave .7s ease-in-out infinite } @keyframes wave { 50% { transform:rotate(-34deg) } }
-  .tile.working .arm { display:none } .tile .laptop, .tile .hands, .tile .sparks, .tile .grin, .tile .eyes-happy, .tile .mouth { display:none }
+  .arm { transition:transform .35s ease } .arm.l { transform-origin:27px 48px } .arm.r { transform-origin:73px 48px } .tile.speaking .arm.r { animation:wave .7s ease-in-out infinite } @keyframes wave { 50% { transform:rotate(-34deg) } }
+  .tile.working .arm.l { transform:rotate(-24deg) } .tile.working .arm.r { transform:rotate(24deg); animation:none }   /* at work the arms reach in, behind the laptop */ .tile .laptop, .tile .hands, .tile .sparks, .tile .grin, .tile .eyes-happy, .tile .mouth { display:none }
   .tile.working .laptop, .tile.working .hands, .tile.done .sparks, .tile.done .eyes-happy { display:inline } .tile.done .eyes-open { display:none }
+  .tile .eyes-open { transition:transform .45s ease; transform:translate(calc(var(--lx,0) * 1.4px), calc(var(--ly,0) * .9px)) } .tile.working .eyes-open { transform:translate(0,0) }   /* the others glance at whoever speaks (gaze()); one move per line, not an endless animation; at work, eyes on the laptop */
   .tile.speaking .mouth { display:inline } .tile.speaking .smile, .tile.speaking .grin { display:none } .tile.done:not(.speaking) .smile { display:none } .tile.done:not(.speaking) .grin { display:inline }
   .hand { animation:type .34s ease-in-out infinite } .hand.r { animation-delay:-.17s } .tile.working .chand { animation:type .34s ease-in-out infinite } .tile.working .chand.r { animation-delay:-.17s }
   .claptop { display:none } .claptop.on, .tile.lap .claptop { display:inline } .tile.lap .claptop { animation:lapin .5s cubic-bezier(.2,.8,.3,1) } .tile.lapout .claptop { animation:lapout .45s ease-in forwards }   /* a laptop pulled out from under the desk, and put away */
@@ -122,6 +123,14 @@ p a, .fine a, li a { color:var(--accent) } p a:hover, .fine a:hover, li a:hover 
   .drift { animation:drift 24s ease-in-out infinite alternate } @keyframes drift { to { transform:translateX(9px) } }
   .steam { animation:steam 2.6s ease-in-out infinite } @keyframes steam { 50% { transform:translateY(-1.4px); opacity:.25 } }
   .tile.done .sparks path { animation:tw 1.6s ease-in-out infinite }
+  /* one-shot moves (oneShot()), never endless: the lid opens and closes, the hands come to the keyboard once it is open, arms up when the work is done, a nod, raised eyebrows, a breath before the first word, the mouth settling into a smile, a stretch */
+  .lid { transform-origin:50px 64px } .tile.working .lid { animation:lidup .45s cubic-bezier(.2,.8,.3,1) } .tile.lidshut .laptop { display:inline } .tile.lidshut .lid { animation:lidshut .38s ease-in forwards } .tile.working .hands { animation:handsin .3s ease-out .25s both }
+  @keyframes lidup { from { transform:scaleY(.06) } } @keyframes lidshut { to { transform:scaleY(.06) } } @keyframes handsin { from { opacity:0; transform:translateY(2px) } }
+  .tile.yay .arm.l { animation:yayl .9s ease-in-out } .tile.yay .arm.r { animation:yayr .9s ease-in-out } .tile.yay:not(.speaking) .fig { animation:hop .7s ease-out } @keyframes yayl { 35%, 65% { transform:rotate(58deg) } } @keyframes yayr { 35%, 65% { transform:rotate(-58deg) } } @keyframes hop { 30% { transform:translateY(-2.4px) } 55% { transform:none } 75% { transform:translateY(-.8px) } }
+  .tile.nod1:not(.speaking) .fig { animation:nod1 .75s ease-in-out } @keyframes nod1 { 30% { transform:translateY(1px) rotate(.5deg) } 60% { transform:translateY(-.4px) } }
+  .tile.stretch:not(.speaking) .fig { animation:stretch 1.2s ease-in-out } @keyframes stretch { 40% { transform:scale(1.03,.97) translateY(.6px) } 65% { transform:scale(.98,1.035) translateY(-1.2px) } }
+  .tile.inhale .brow { animation:browup .34s ease-out } .tile.wow .brow { animation:wow 1.1s ease-out } @keyframes browup { 50% { transform:translateY(-1.8px) } } @keyframes wow { 20%, 70% { transform:translateY(-1.9px) } }
+  .tile.settle .smile, .tile.settle .grin { transform-box:fill-box; transform-origin:center; animation:settle .35s ease-out } @keyframes settle { from { transform:scale(.55,1.8) } }
   @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important } .confetti, .fly { display:none !important } }
 </style>
 </head>
@@ -142,7 +151,7 @@ p a, .fine a, li a { color:var(--accent) } p a:hover, .fine a:hover, li a:hover 
 
     <p class="lead" data-en="It reads the session files Claude Code, Codex and Mistral Vibe already write, so it works <b>wherever you run them</b>: VS Code, Cursor, a plain terminal, the desktop app. Nothing to configure, nothing sent anywhere." data-fr="Il lit les fichiers de session que Claude Code, Codex et Mistral Vibe écrivent déjà : il marche donc <b>partout où vous les lancez</b> : VS Code, Cursor, un simple terminal, l’application de bureau. Rien à configurer, rien n’est envoyé.">It works wherever you run Claude Code, Codex or Mistral Vibe.</p>
     <div class="cta-row">
-      <a class="cta" id="ctaVsc" href="https://marketplace.visualstudio.com/items?itemName=DoubleGeste.agent-standup" target="_blank" rel="noopener"><span data-en="Install in VS Code" data-fr="Installer dans VS Code">Install in VS Code</span><small id="dlS">v1.42.0</small></a>
+      <a class="cta" id="ctaVsc" href="https://marketplace.visualstudio.com/items?itemName=DoubleGeste.agent-standup" target="_blank" rel="noopener"><span data-en="Install in VS Code" data-fr="Installer dans VS Code">Install in VS Code</span><small id="dlS">v1.45.0</small></a>
       <a class="cta ghost" href="#ways" data-en="No VS Code? Pick your way ↓" data-fr="Pas de VS Code ? Choisissez ↓">No VS Code? Pick your way ↓</a>
     </div>
     <p class="fine" data-en="Free · open source · Mac, Windows, Linux<br>Or in 30 seconds, no editor: <code style='white-space:nowrap'>npx @double_geste/agent-standup@latest --open</code>" data-fr="Gratuit · open source · Mac, Windows, Linux<br>Ou en 30 secondes, sans éditeur : <code style='white-space:nowrap'>npx @double_geste/agent-standup@latest --open</code>">Free · open source</p>
@@ -220,16 +229,21 @@ const FR = () => LANG === 'fr';   // the art block shared with the app expects t
 // =====================================================================
 const NAMES = ['Ada','Linus','Grace','Alan','Margaret','Dennis','Barbara','Ken','Radia','Tim','Hedy','Guido','Frances','Bjarne','Katherine','Brian','Sophie','Niklaus','Annie','Donald','Joan','Edsger','Lynn','Vint','Mae','Rob','Zoe','Ivan','Nina','Otto','Lena','Hugo','Ines','Théo','Maya','Jules','Alma','Remy','Cleo','Noah','Iris','Leo','Mira','Axel','Nora','Eli','Lou','Gaby'];
 const nameBook = {};   // agent id → unique first name within the session
-// The lead's name: Margot, or the one chosen in ⚙ → All settings (prefs.leadName) or in the editor (agentStandup.leadName, which wins: AS_APP.lead, see appKind in server.js). Plain text of 24 characters at most: it is written into the page in many places.
+// The lead's name: Margot, the global default, the current project override, or the name in the editor (agentStandup.leadName, which wins: AS_APP.lead, see appKind in server.js). Plain text of 24 characters at most: it is written into the page in many places.
 // typeof: the landing page reuses this section and has neither prefs nor APP
 const LEAD_NAME = 'Margot', cleanLead = (v) => Array.from(String(v == null ? '' : v).replace(/'/g, '’').replace(/[\u0000-\u001f\u007f-\u009f<>&"`\\]/g, '').replace(/\s+/g, ' ').trim()).slice(0, 24).join('').trim();
-const leadName = () => (typeof APP === 'object' && APP && cleanLead(APP.lead)) || (typeof prefs === 'object' && prefs && cleanLead(prefs.leadName)) || LEAD_NAME;
+// One top-level preference per project: the existing prefsPatch merges independent window edits without replacing a shared map.
+const projectLeadKey = () => typeof leadProject === 'object' && leadProject ? 'leadName:' + leadProject.key : '';
+const leadName = () => (typeof APP === 'object' && APP && cleanLead(APP.lead)) || (typeof prefs === 'object' && prefs && (cleanLead(prefs[projectLeadKey()]) || cleanLead(prefs.leadName))) || LEAD_NAME;
 const isLeadName = (n) => { const l = leadName().toLocaleLowerCase(), s = String(n || '').toLocaleLowerCase(); return !!n && (s === l || (s.startsWith(l + ' ') && /^\d+$/.test(s.slice(l.length + 1)))); };   // whatever the capitals: Ivan and ivan would read as one agent, and Ivan 2 as a fork of the lead
+// Your own names for the sub-agents (⚙ → All settings → Sub-agent names, prefs.subNames: names separated by commas), given in your order instead of the built-in list. Parsed again only when the text changes
+let subListMemo = { text: null, list: [] };
+const subNameList = () => { const t = typeof prefs === 'object' && prefs && typeof prefs.subNames === 'string' ? prefs.subNames : ''; if (t !== subListMemo.text) { const seen = new Set(), list = []; for (const v of t.split(/[,;\n]+/)) { const n = cleanLead(v), k = n.toLocaleLowerCase(); if (n && !seen.has(k) && list.length < 200) { seen.add(k); list.push(n); } } subListMemo = { text: t, list }; } return subListMemo.list; };
 function uniqueName(id, h) {
-  if (nameBook[id]) return nameBook[id]; const taken = new Set(Object.values(nameBook).map((n) => n.toLocaleLowerCase())), n0 = taken.size; taken.add(leadName().toLocaleLowerCase());   // never the lead's own name: one may be chosen from this list
-  for (let k = 0; k < NAMES.length; k++) { const n = NAMES[(h + k) % NAMES.length]; if (!taken.has(n.toLocaleLowerCase())) return (nameBook[id] = n); }
-  let b = h % NAMES.length; if (isLeadName(NAMES[b])) b = (b + 1) % NAMES.length;   // every name taken: a number after it, but never after the lead's name ("Ivan 48" would read as a fork of a lead called Ivan)
-  return (nameBook[id] = NAMES[b] + ' ' + (n0 + 1));
+  if (nameBook[id]) return nameBook[id]; const taken = new Set(Object.values(nameBook).map((n) => n.toLocaleLowerCase())); taken.add(leadName().toLocaleLowerCase());   // never the lead's own name: one may be chosen from this list
+  const own = subNameList().filter((n) => !isLeadName(n)), pool = own.length ? own : NAMES, at = own.length ? 0 : h;   // your list: its names in your order; the built-in one: a name drawn from the agent's id
+  for (let k = 0; k < pool.length; k++) { const n = pool[(at + k) % pool.length]; if (!taken.has(n.toLocaleLowerCase())) return (nameBook[id] = n); }
+  for (let r = 2; ; r++) for (let k = 0; k < pool.length; k++) { const b = pool[(at + k) % pool.length]; if (isLeadName(b)) continue; const n = b + ' ' + r; if (!taken.has(n.toLocaleLowerCase())) return (nameBook[id] = n); }   // every name taken: Ada 2, Linus 2… then Ada 3, never after the lead's name ("Ivan 2" would read as a fork of a lead called Ivan); the pool always holds a name that is not the lead's
 }
 const PAL = ['#ff7a6b','#ffb347','#ffd84a','#4fd1a5','#4cc3ff','#7c8cff','#b583ff','#ff7eb6'];
 const hexRGB = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -240,7 +254,7 @@ const CHAR_CHOICES = ['none', 'folder', 'cats', 'halloween'];   // what ⚙ → 
 let SHOP = {};   // the packs of the shop, by name, as the server knows them: how many characters are here (none until it is bought), its price, the code of the purchase
 const toData = (url) => fetch(url).then((r) => r.blob()).then((b) => new Promise((res) => { const f = new FileReader(); f.onload = () => res(f.result); f.readAsDataURL(b); }));
 const imgSize = (src) => new Promise((res) => { const i = new Image(); i.onload = () => res([i.naturalWidth, i.naturalHeight]); i.onerror = () => res([0, 0]); i.src = src; }), isDrawing = (wh) => Math.max(wh[0], wh[1]) > 128;   // a large image is a drawing, shown smooth; pixel art (32 or 64 px) keeps its hard pixels
-const youMode = () => prefs.charYou || (prefs.charPack === 'none' ? 'vampire' : 'cast');   // who you are: the cast's own human, or the vampire of the Halloween pack, everyone's and free (the default with the drawn characters, so that everyone meets the pack)
+const youMode = () => prefs.charYou || (prefs.charPack === 'none' && new Date().getMonth() === 9 ? 'vampire' : 'cast');   // who you are: the cast's own human, or the vampire of the Halloween pack, everyone's and free (the default with the drawn characters in October only, so that everyone meets the pack; the rest of the year a choice in ⚙ → Characters, kept once picked)
 let VAMP = null;   // the free vampire (examples/vampire), loaded once
 async function charEntry(base, c) {   // one character of a folder or a pack, ready to draw: its pictures as data, their sizes, what it may wear
   const e = { name: c.stem, idle: await toData(base + encodeURIComponent(c.file)), talk: c.talk ? await toData(base + encodeURIComponent(c.talk)) : null, bg: c.bg ? await toData(base + encodeURIComponent(c.bg)) : null, desks: await Promise.all((c.desks || []).map((f) => toData(base + encodeURIComponent(f)))), hands: c.hands ? await toData(base + encodeURIComponent(c.hands)) : null, head: c.head ? await toData(base + encodeURIComponent(c.head)) : null };
@@ -263,11 +277,18 @@ async function loadChars() {
   if (youMode() === 'vampire') { try { VAMP = VAMP || (await vampEntry()); if (VAMP) { next.you = VAMP; next.youFrom = 'vampire'; } } catch {} }
   CHARS = next;
 }
-const customFor = (id) => {   // sub-agents: the best-hashed image no other agent holds; the whole pool again only once every image is taken
+const charKey = (s) => String(s || '').split(':').pop().toLowerCase().replace(/[\s_\-]+/g, '-').replace(/^-+|-+$/g, '');   // "QA Agent", qa_agent, plugin:qa-agent → qa-agent
+const STOCK_TYPE = /^(main|general-purpose|explore|plan|claude|agent|task|fork|default|worker|explorer|subagent|workflow-subagent|statusline-setup|output-style-setup|claude-code-guide|verification|magic-docs)$/i;   // the types the tools ship (as STOCK_AGENT in server.js, with the lead's main and Codex's roles): not names, so agent.png or explore.png stays a picture for anyone
+const agentKeys = (a) => (a ? [!STOCK_TYPE.test(String(a.type || '').split(':').pop()) && a.type, a.own && a.own.replace(/ \d+$/, '')] : []).map(charKey).filter(Boolean);   // its type (.claude/agents/qa.md) and the name it was launched with; "Qa 2", the second of its name, is still qa
+const wears = (c, keys) => { const s = c.key || (c.key = charKey(c.name)), m = s.match(/^(.+)-(\d+|[a-z])$/); return keys.has(s) || !!(m && keys.has(m[1])); };   // qa.png, and qa-2.png or qa-f.png for other looks of the same agent; qa-lead.png is a character of its own
+const customFor = (id, a = S.agents[id]) => {   // sub-agents: an image named after the agent; otherwise the best-hashed image no other agent holds; the whole pool again only once every image is taken
   if (id === 'main') return CHARS.lead; if (id === 'user') return CHARS.you; if (!CHARS.pool.length) return null;
-  const used = new Set(Object.keys(S.agents).filter((k) => k !== id && S.agents[k].custom).map((k) => S.agents[k].custom.name));
-  const free = CHARS.pool.filter((c) => !used.has(c.name)), varied = CHARS.pool.filter((c) => c.extras && Object.keys(c.extras).some((k) => !/^sticker/.test(k))), from = free.length ? free : varied.length ? varied : CHARS.pool;   // varied: what the character itself wears (a hat, glasses), not the stickers of its laptop   // every image taken: one that has extras (a hat, glasses…) is given again, since it does not look the same twice
-  return from.reduce((b, c) => (hash(id + '|' + c.name) > hash(id + '|' + b.name) ? c : b));   // by the character's name, not its picture: a pack drawn again gives each agent the same character
+  const others = Object.keys(S.agents).filter((k) => k !== id), used = new Set(others.filter((k) => S.agents[k].custom).map((k) => S.agents[k].custom.name)), pick = (l) => l.reduce((b, c) => (hash(id + '|' + c.name) > hash(id + '|' + b.name) ? c : b));   // by the character's name, not its picture: a pack drawn again gives each agent the same character
+  const keys = new Set(agentKeys(a)), mine = keys.size ? CHARS.pool.filter((c) => wears(c, keys)) : [];
+  if (mine.length) { const f = mine.filter((c) => !used.has(c.name)); return pick(f.length ? f : mine); }   // its own picture even when another agent of the same name wears it: two QAs both look like the QA
+  const theirs = new Set([...others.map((k) => S.agents[k]), ...(S.soon || []).filter((x) => x.id !== id)].flatMap(agentKeys)), left = CHARS.pool.filter((c) => !wears(c, theirs)), pool = left.length ? left : CHARS.pool;   // nor does an agent without one take the picture of another agent in the call, or of one arriving with it (S.soon: a call opened late knows its QA before the agents born earlier get their pictures)
+  const free = pool.filter((c) => !used.has(c.name)), varied = pool.filter((c) => c.extras && Object.keys(c.extras).some((k) => !/^sticker/.test(k))), from = free.length ? free : varied.length ? varied : pool;   // varied: what the character itself wears (a hat, glasses), not the stickers of its laptop   // every image taken: one that has extras (a hat, glasses…) is given again, since it does not look the same twice
+  return pick(from);
 };
 // ---- the shop: a pack that is sold. The page never sees a card: the button asks the app's server for a payment page (Stripe's, through the website), opens it, and then asks for the pack until it is paid
 const shopSay = (t) => { const m = $('#shopMsg'); if (m) m.textContent = t; };
@@ -339,10 +360,14 @@ async function openChars() {   // ⚙ → Characters: the whole cast (drawn, a p
 }
 function renderFolder(el, mine) {   // one's own pictures: where they are, a button per role to add one, and the ones there, each with a way to take it out (moved aside, never deleted)
   const role = (c) => (c.role === 'lead' ? L('Chef', 'Lead') : c.role === 'you' ? L('Vous', 'You') : L('Sous-agent', 'Sub-agent'));
+  const subs = Object.values(S.agents).filter((p) => p.id !== 'main' && p.id !== 'user' && !p.twin), on = (c) => (CHARS.pack === 'folder' && c.role === 'agent' ? subs.filter((p) => p.custom && p.custom.name === c.stem).map((p) => p.name) : []);   // who wears each picture now, while the folder is the cast
+  const pics = mine.chars.filter((c) => c.role === 'agent').map((c) => ({ name: c.stem })), want = [...new Set(subs.map((p) => !STOCK_TYPE.test(String(p.type || '').split(':').pop()) && charKey(p.type)).filter(Boolean))].filter((k) => !pics.some((c) => wears(c, new Set([k]))));   // the agent types of the call (.claude/agents/qa.md) with no picture of their own yet: the file name to draw. Not the names agents were launched with, which change from one session to the next
+  const worn = (c) => { const w = on(c); return w.length ? ' → ' + esc(w.slice(0, 3).join(', ') + (w.length > 3 ? ' +' + (w.length - 3) : '')) : ''; };
   el.innerHTML = `${esc(L('Vos images sont dans ce dossier :', 'Your pictures are in this folder:'))} <code style="word-break:break-all">${esc(mine.dir || CHARS.dir || '')}</code>
     <div class="slots">${[['you', L('Vous', 'You')], ['lead', L('Chef', 'Lead')], ['agent', L('Sous-agents', 'Sub-agents')]].map(([r, t]) => `<div class="slot"><b>${esc(t)}</b><button class="btn" data-add="${r}">${esc(r === 'agent' ? L('Ajouter des images', 'Add pictures') : L('Choisir une image', 'Choose a picture'))}</button>${r !== 'agent' ? `<button class="btn" data-add="${r}-talk">${esc(L('Bouche ouverte (facultatif)', 'Open mouth (optional)'))}</button>` : ''}</div>`).join('')}</div>
-    <div class="mine">${mine.chars.length ? mine.chars.map((c) => `<span class="chip"><img src="/characters/${encodeURIComponent(c.file)}" alt="">${esc(c.stem)} · ${esc(role(c))}<button class="ic" data-rm="${esc(c.file)}" aria-label="${esc(L('Retirer', 'Remove'))}" title="${esc(L('Retirer', 'Remove'))}">✕</button></span>`).join('') : esc(L('Aucune image pour l’instant.', 'No picture yet.'))}</div>
-    <p class="dim" style="margin:8px 0 0;font-size:11.5px">${esc(L('lead.png = le chef · you.png = vous · les autres = les sous-agents · nom-talk.png = bouche ouverte', 'lead.png = the lead · you.png = you · others = the sub-agents · name-talk.png = open mouth'))}</p>
+    <div class="mine">${mine.chars.length ? mine.chars.map((c) => `<span class="chip"><img src="/characters/${encodeURIComponent(c.file)}" alt="">${esc(c.stem)} · ${esc(role(c))}${worn(c)}<button class="ic" data-rm="${esc(c.file)}" aria-label="${esc(L('Retirer', 'Remove'))}" title="${esc(L('Retirer', 'Remove'))}">✕</button></span>`).join('') : esc(L('Aucune image pour l’instant.', 'No picture yet.'))}</div>
+    <p class="dim" style="margin:8px 0 0;font-size:11.5px">${esc(L('lead.png = le chef · you.png = vous · les autres = les sous-agents · nom-talk.png = bouche ouverte', 'lead.png = the lead · you.png = you · others = the sub-agents · name-talk.png = open mouth'))}<br>${esc(L('qa.png = le sous-agent nommé qa (.claude/agents/qa.md) · qa-2.png = un autre de ses visages', 'qa.png = the sub-agent named qa (.claude/agents/qa.md) · qa-2.png = another look of it'))}</p>
+    ${want.length ? `<p class="dim" style="margin:6px 0 0;font-size:11.5px">${esc(L('Dans cet appel, sans image à leur nom : ', 'In this call, without a picture of their own: '))}${want.map((k) => `<code>${esc(k)}.png</code>`).join(', ')}</p>` : ''}
     <div style="display:flex;gap:6px;margin-top:8px"><button class="btn" id="charReload">${esc(L('Recharger', 'Reload'))}</button>${EMBED ? `<button class="btn" id="charOpen">${esc(L('Ouvrir le dossier', 'Open folder'))}</button>` : ''}</div>
     <div id="shopMsg" role="status" style="margin-top:6px"></div><input type="file" id="charFile" accept="image/png,image/gif,image/webp,image/jpeg" hidden>`;
   const inp = $('#charFile'), post = (p, b) => fetch(p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }).then((r) => r.json()).catch(() => ({ error: 'write' }));
@@ -365,12 +390,16 @@ function packNote() {   // the Halloween pack, to someone without it, twice a se
     : dd >= 19 ? L('Halloween approche : déguisez vos agents en citrouille, fantôme, sorcière ou squelette, dessinés à la main par Fabien Coupas.', 'Halloween is coming: dress your agents up as a pumpkin, a ghost, a witch or a skeleton, drawn by hand by Fabien Coupas.') : L('Pour Halloween, vous êtes le vampire. Le reste de l’équipe est dans le pack Halloween.', 'This Halloween, you are the vampire. The rest of the cast is in the Halloween pack.');
   $('#packNoteB').textContent = L('Voir le pack', 'See the pack') + ' · ' + price;
 }
-function persona(a) { const p = persona0(a); p.custom = customFor(p.twin ? 'main' : a.id); return p; }   // a fork wears the lead's own picture too
-const subName = (a, h) => (a.own && prefs.ownNames && !isLeadName(a.own) ? (nameBook[a.id] = a.own) : ((a.twinN || !isLeadName(a.given)) && a.given) || uniqueName(a.id, h));   /* a fork is the one agent named after the lead */   // own: the name the person gave this agent (see ownName in server.js); otherwise a first name from the list. a.own is tested first: the landing page reuses this section and has no settings
+function persona(a) { const p = persona0(a); p.custom = customFor(p.twin ? 'main' : a.id, p); return p; }   // a fork wears the lead's own picture too
+// The order agents are named in: the order they started (born, from the server), not the order their files are listed in (by their ids: effectively random). A reload, a replay and the live call then give each agent
+// the same name, a first name of your list the same agent, and a fork the same number. Without born (the demo, a session just started), the order they came in
+const byBorn = (list) => list.map((a, j) => ({ a, j })).sort((x, y) => (x.a.born || Infinity) - (y.a.born || Infinity) || x.j - y.j).map((x) => x.a);
+const ownFree = (a) => { const taken = new Set(Object.keys(nameBook).filter((k) => k !== a.id).map((k) => nameBook[k].toLocaleLowerCase())); let n = a.own; for (let r = 2; taken.has(n.toLocaleLowerCase()); r++) n = a.own + ' ' + r; return n; };   // a name of its own that another agent has already (a first name of your list, or the same name from another tool): a number after it
+const subName = (a, h) => (/^visit:/.test(a.id || '') ? (isLeadName(a.given) ? NAMES[(h + 1) % NAMES.length] : a.given) : a.own && prefs.ownNames && !isLeadName(a.own) ? (nameBook[a.id] = ownFree(a)) : ((a.twinN || (!isLeadName(a.given) && !subNameList().length)) && a.given) || uniqueName(a.id, h));   /* a visitor from another session keeps its built-in name and takes none of the call's names; a fork is the one agent named after the lead; with your own list, the names a tool gave (Codex's nicknames, the demo's) give way to it */   // own: the name the person gave this agent (see ownName in server.js); otherwise a first name from the list. a.own is tested first: the landing page reuses this section and has no settings
 function renameAll(lead) {   // ⚙ → own names on or off, or a new name for the lead: every sub-agent is named again, in the order it arrived, as a reload would name them
   const names = () => Object.values(S.agents).map((p) => p.name).join('\n'), was = names();
   if (lead) for (const p of Object.values(S.agents)) if (p.id === 'main' || p.twinN) { const q = persona(p); p.name = q.name; p.given = q.given; }   // the lead and its forks first: the others then keep clear of the lead's name
-  for (const k in nameBook) delete nameBook[k]; for (const p of Object.values(S.agents)) if (p.id !== 'main' && p.id !== 'user') p.name = p.twinN && !(p.own && prefs.ownNames && !isLeadName(p.own)) ? p.given : subName(p, hash(p.id));   // a fork is the lead's twin unless it has a name of its own to keep
+  for (const k in nameBook) delete nameBook[k]; for (const p of byBorn(Object.values(S.agents))) if (p.id !== 'main' && p.id !== 'user') p.name = p.twinN && !(p.own && prefs.ownNames && !isLeadName(p.own)) ? p.given : subName(p, hash(p.id));   // a fork is the lead's twin unless it has a name of its own to keep
   if (!lead || names() !== was) { buildStage(); renderTokens(); renderCtx(); paintStatus(); renderLog(true); syncUI(); }   // the new tiles get their tokens and context at once, not at the next usage
 }
 function persona0(a) {
@@ -447,7 +476,7 @@ function avatarSVG(p, o, uid = '') {   // uid keeps SVG ids unique per instance:
   const st = !!o, sh = SHAPES[p.shape], fy = sh.fy, top = sh.top, bot = p.shape === 4, c = p.shirt, c1 = mix(c, '#ffffff', .3), c2 = mix(c, '#000000', .2);
   const ink = bot ? '#8ff0ff' : '#2a2233', gid = uid + 'b' + p.gid, sc = SCENES[p.scene], eg = EYES[p.eye], ex = p.shape === 1 ? [43, 57] : [41.5, 58.5];
   const V = (cls, show, html) => (st ? (show ? html : '') : `<g class="${cls}">${html}</g>`);
-  const d0 = -((hash(p.id) % 45) / 10);
+  const d0 = -((hash(p.id) % 45) / 10), bd = 4 + ((hash(p.id) >>> 4) % 15) / 10, kd = 4 + ((hash(p.id) >>> 9) % 21) / 10;   // its own breathing (4 to 5.4 s) and blinking (4 to 6 s): a full call does not move in step
   const eye = (x) => `<g class="eye"><ellipse cx="${x}" cy="${fy}" rx="${eg.rx}" ry="${eg.ry}" fill="${ink}"/><g class="pupil"><circle cx="${x + 1}" cy="${fy - 1.5}" r="1.1" fill="#fff"/><circle cx="${x - 1}" cy="${fy + 1.4}" r=".55" fill="#fff" opacity=".7"/></g></g>`;
   const happy = (x) => `<path d="M${x - 3.6} ${fy + 1.4}Q${x} ${fy - 4.2} ${x + 3.6} ${fy + 1.4}" fill="none" stroke="${ink}" stroke-width="1.7" stroke-linecap="round"/>`;
   const brow = (x, s) => `<path class="brow ${s}" d="M${x - 3.6} ${fy - eg.ry - 3}q3.6-2 7.2 0" fill="none" stroke="${ink}" stroke-width="1.4" stroke-linecap="round"/>`;
@@ -459,13 +488,13 @@ function avatarSVG(p, o, uid = '') {   // uid keeps SVG ids unique per instance:
     ${V('mouth', speaking, `<ellipse class="mouthE" cx="50" cy="${my + 1}" rx="${mopen ? 4 : 4.6}" ry="${mopen ? 4.4 : .9}" fill="${bot ? '#8ff0ff' : '#4b1c2c'}"/>`)}
     ${p.glasses ? `<g fill="rgba(255,255,255,.16)" stroke="#2c2f40" stroke-width="1.1"><circle cx="${ex[0]}" cy="${fy}" r="6.2"/><circle cx="${ex[1]}" cy="${fy}" r="6.2"/><path d="M${ex[0] + 6.2} ${fy}h${ex[1] - ex[0] - 12.4}" fill="none"/></g>` : ''}`;
   const acc = ACC[p.acc](top, p.acc2, fy, sh.hw) + (p.lead ? `<path d="M${50 - sh.hw} ${fy + 5}q-2 11 13 12" fill="none" stroke="#2c2f40" stroke-width="1.2" stroke-linecap="round"/><circle cx="${50 - sh.hw + 13}" cy="${fy + 17}" r="1.9" fill="#2c2f40"/>` : '');
-  const arm = (side) => `<g class="arm ${side}"><ellipse cx="${side === 'l' ? 25 : 75}" cy="56" rx="4.6" ry="9" fill="${c2}" transform="rotate(${side === 'l' ? 12 : -12} ${side === 'l' ? 25 : 75} 56)"/></g>`;
+  const arm = (side) => `<g class="arm ${side}"${working ? ` transform="rotate(${side === 'l' ? -24 : 24} ${side === 'l' ? 27 : 73} 48)"` : ''}><ellipse cx="${side === 'l' ? 25 : 75}" cy="56" rx="4.6" ry="9" fill="${c2}" transform="rotate(${side === 'l' ? 12 : -12} ${side === 'l' ? 25 : 75} 56)"/></g>`;
   const prop = [`<path d="M11 62.4l1.6-7.4h7.2l1.6 7.4z" fill="#e07a5f"/><path d="M16 55q-6-8-2-12q5 4 2 12z" fill="#3fbf7f"/><path d="M16 55q6-7 10-5q-1 6-10 5z" fill="#53c98a"/>`,
     `<rect x="79" y="55.6" width="7.4" height="6.8" rx="1.6" fill="#f6f2ea"/><path d="M86.2 57q3.2 0 3.2 2.2t-3.2 2.2" fill="none" stroke="#f6f2ea" stroke-width="1.3"/><g class="steam" fill="none" stroke="#fff" stroke-width=".8" stroke-linecap="round" opacity=".7"><path d="M81.5 53q-1.4-1.8 0-3.4M84.3 53q-1.4-1.8 0-3.4"/></g>`,
     `<rect x="76" y="58.2" width="14" height="4.2" rx="1" fill="#ff7a6b"/><rect x="77.5" y="54.4" width="12" height="3.8" rx="1" fill="#4cc3ff"/><rect x="76.5" y="50.8" width="11" height="3.6" rx="1" fill="#ffd84a"/>`][p.prop] + (pumpkinDay() ? pumpkin(p.prop === 0 ? 83 : 17) : '');   /* on the 30th and 31st of October, a carved pumpkin on the other side of the desk */
-  const lap = `<rect x="33" y="46" width="34" height="18" rx="2.8" fill="#d3d8e6"/><rect x="33" y="46" width="34" height="18" rx="2.8" fill="url(#${uid}lg)" opacity=".5"/><circle cx="50" cy="55" r="2.3" fill="${c1}"/><rect x="29.5" y="63.4" width="41" height="3" rx="1.5" fill="#aab1c2"/>`;
+  const lap = `<g class="lid"><rect x="33" y="46" width="34" height="18" rx="2.8" fill="#d3d8e6"/><rect x="33" y="46" width="34" height="18" rx="2.8" fill="url(#${uid}lg)" opacity=".5"/><circle cx="50" cy="55" r="2.3" fill="${c1}"/></g><rect x="29.5" y="63.4" width="41" height="3" rx="1.5" fill="#aab1c2"/>`;
   const lapDark = `<rect x="33" y="46" width="34" height="18" rx="2.8" fill="#3b4152"/><rect x="33" y="46" width="34" height="18" rx="2.8" fill="url(#${uid}lg)" opacity=".18"/><circle cx="50" cy="55" r="2.3" fill="${c1}"/><rect x="29.5" y="63.4" width="41" height="3" rx="1.5" fill="#262a36"/>`;   // for custom characters: darker, so it still shows under a white or cream sprite
-  const hands = `<circle class="hand l" cx="38" cy="65.6" r="3.1" fill="${c2}"/><circle class="hand r" cx="62" cy="65.6" r="3.1" fill="${c2}"/>`;
+  const hands = `<circle class="hand l" cx="32.7" cy="59.8" r="3.1" fill="${c2}"/><circle class="hand r" cx="67.3" cy="59.8" r="3.1" fill="${c2}"/>`;   // on the keyboard, behind the lid we see from the back: only their outer sides show
   const sparks = star(22, 28, 3) + star(78, 22, 2.6, '#ff9bb8') + star(70, 40, 1.9, '#9be7ff') + star(30, 46, 1.6, '#ffe58a');
   const custFig = (c, talking, who) => { const base = c.full ? 'width="100" height="75" preserveAspectRatio="xMidYMid slice"' : 'x="20" y="6" width="60" height="58" preserveAspectRatio="xMidYMax meet"', px = c.smooth ? '' : 'image-rendering:pixelated;';
     const worn = c.extras ? Object.keys(c.extras).filter((k) => !/^sticker/.test(k)).map((k) => { const n = c.extras[k].length, i = hash(who + '+' + k) % (2 * n); return i < n ? `<image href="${c.extras[k][i]}" ${base} style="${px}"/>` : ''; }).join('') : '';   // one of each kind, or none, half of the time: always the same for a given agent
@@ -485,12 +514,12 @@ function avatarSVG(p, o, uid = '') {   // uid keeps SVG ids unique per instance:
       <linearGradient id="${uid}dk${p.scene}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sc.desk[0]}"/><stop offset="1" stop-color="${sc.desk[1]}"/></linearGradient>
       <linearGradient id="${uid}lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
     ${room ? `<clipPath id="${room}c"><rect y="62" width="100" height="13"/></clipPath><image id="${room}" href="${p.custom.bg}" width="100" height="75" preserveAspectRatio="xMidYMid slice"${p.custom.bgSmooth ? '' : ' style="image-rendering:pixelated"'}/>` : sc.svg().replace(/id="(g[a-z]\d)"/g, `id="${uid}$1"`).replace(/url\(#(g[a-z]\d)\)/g, `url(#${uid}$1)`)}
-    <g class="fig${p.custom && p.custom.head ? ' still' : ''}" style="--d:${d0}s">
+    <g class="fig${p.custom && p.custom.head ? ' still' : ''}" style="--d:${d0}s;--bd:${bd}s;--kd:${kd}s">
       ${fig}
     </g>
     ${p.custom ? custFront(p.custom, uid + 'hd' + p.gid, p.id || p.gid) : ''}
     ${room ? `<use href="#${room}" clip-path="url(#${room}c)"/>` : `<rect y="62" width="100" height="13" fill="url(#${uid}dk${p.scene})"/><rect y="62" width="100" height="1.3" fill="#fff" opacity=".38"/><rect y="63.3" width="100" height="2.6" fill="#000" opacity=".1"/>`}
-    ${room ? '' : prop}${p.custom ? (prefs.customLaptop && !(p.custom.desks && p.custom.desks.length) ? V('laptop', working, lapDark) : '') : V('laptop', working, lap) + V('hands', working, hands)}${V('sparks', done, `<g class="sparks">${sparks}</g>`)}
+    ${room ? '' : prop}${p.custom ? (prefs.customLaptop && !(p.custom.desks && p.custom.desks.length) ? V('laptop', working, lapDark) : '') : V('hands', working, hands) + V('laptop', working, lap)}${V('sparks', done, `<g class="sparks">${sparks}</g>`)}
   </svg>`;
 }
 
